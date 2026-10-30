@@ -1,0 +1,21 @@
+{
+  "name": "BDPay pay box",
+  "payNow": {
+    "heading": "Complete your payment with bKash / Nagad",
+    "text": "Pay now and enter your TrxID to confirm your order.",
+    "button": "Pay now"
+  },
+  "pending": {
+    "title": "Verifying your payment",
+    "link": "Check status"
+  },
+  "paid": {
+    "title": "Payment confirmed ✓"
+  },
+  "waitLonger": {
+    "text": "Your payment link is being created — please refresh this page in a moment"
+  },
+  "failed": {
+    "text": "The payment link did not load — please refresh this page"
+  }
+}

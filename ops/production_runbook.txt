@@ -1,0 +1,317 @@
+BDPay production runbook (spec 15)
+===================================
+
+You run every step below by hand, in order, in Windows PowerShell from D:\BDPay unless a step says otherwise.
+Claude Code never runs these commands. No step deletes data.
+
+BEFORE YOU START
+- tests/e2e/E2E_CHECKLIST.txt (spec 14) is complete: A-P PASS or documented and fixed.
+- Specs 09, 10, 10a, 11, 12 and 12a are built and pass locally (`supabase test db` included); the real
+  rate limiter of spec 09 exists (the health function needs it).
+- Accounts: Supabase (paid plan), Resend, Cloudflare (with your BDPay domain added), Shopify Partner.
+- From the staging project, note the DIGESTS (not values) of PAY_TOKEN_SECRET, CRON_SECRET and SHOPIFY_API_SECRET:
+      supabase secrets list --project-ref <staging-ref>
+  Production must never show the same digests (step 3 and step 7 checks).
+- Never reuse anything from staging: no secret, no Shopify app, no Pages project, no keystore, no database.
+- Secrets go ONLY into a hidden prompt in this terminal, `supabase secrets set`, Dashboard > Vault, Resend or the
+  Supabase dashboard fields. Never into a file, never typed after "=" on a command line.
+- Use ONE PowerShell window for steps 2-9 and do not close it.
+
+Paste these helpers into that window first (they only define functions; nothing runs):
+
+    function Read-Secret([string]$Prompt) {
+      $s = Read-Host -AsSecureString $Prompt
+      [Net.NetworkCredential]::new('', $s).Password
+    }
+    function New-RandomSecret {
+      $b = New-Object byte[] 32
+      $r = [Security.Cryptography.RandomNumberGenerator]::Create(); $r.GetBytes($b); $r.Dispose()
+      [Convert]::ToBase64String($b)
+    }
+    function Set-ProdSecret([string]$Name) {
+      $v = Read-Secret $Name
+      supabase secrets set "$Name=$v" | Out-Null
+      Remove-Variable v
+    }
+
+<ref> = the production project reference (dashboard URL after /project/). <domain> = your BDPay domain.
+Neither is a secret.
+
+
+STEP 1 - Production Supabase project
+-------------------------------------
+Check the current plans and prices first: https://supabase.com/pricing (a paid plan includes daily backups).
+Dashboard > New project
+  Name: bdpay-prod      Region: Southeast Asia (Singapore)      Plan: a paid plan (Pro or higher)
+  Database password: generate one, save it in your password manager only.
+Dashboard > Advisors > Security Advisor and Performance Advisor: open both (run them again after step 2 and fix
+every ERROR before launch).
+check: Project Settings > Billing shows the paid plan; Database > Backups shows daily backups scheduled; both
+advisors open without errors (re-check after step 2).
+
+
+STEP 2 - Link, push the migrations, load the SMS rules
+-------------------------------------------------------
+This folder must not still be linked to staging:
+
+    Test-Path supabase\.temp\project-ref
+        (must print False; if True run `supabase unlink` first)
+    supabase link --project-ref <ref>
+        (type the database password at the prompt; never use -p)
+    supabase db push
+        (never add --include-seed)
+
+Load the latest SMS rules (Dashboard > Project Settings > API Keys > service_role > Reveal > copy):
+
+    $env:SUPABASE_URL = "https://<ref>.supabase.co"
+    $env:SUPABASE_SERVICE_ROLE_KEY = Read-Secret "production service_role key (paste, Enter)"
+    echo $env:SUPABASE_URL
+    deno run --allow-net=<ref>.supabase.co --allow-env=SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY --allow-read=supabase/functions/_shared/parser_rules.json supabase/scripts/load_parser_rules.ts
+    Remove-Item Env:SUPABASE_SERVICE_ROLE_KEY, Env:SUPABASE_URL
+
+Then Dashboard > Advisors: run both again; fix every ERROR (RLS on every table is part of spec 12).
+check: `supabase projects list` marks bdpay-prod as linked; `supabase migration list --linked` shows every local
+migration under "Remote"; the script printed "<version> loaded" with the same version as staging's last load;
+both advisors show no ERROR.
+
+
+STEP 3 - Edge Function secrets (part 1)
+---------------------------------------
+NEW random values - never the staging ones (keep $cron in this window for step 5):
+
+    $v = New-RandomSecret; supabase secrets set "PAY_TOKEN_SECRET=$v"; Remove-Variable v
+    $cron = New-RandomSecret; supabase secrets set "CRON_SECRET=$cron"
+    supabase secrets set SHOPIFY_SCOPES=read_orders,write_orders SHOPIFY_API_VERSION=2026-10
+    supabase secrets set FUNCTIONS_URL=https://<ref>.supabase.co/functions/v1
+
+Set later, when their values exist: RESEND_API_KEY and ALERT_FROM_EMAIL (step 6), PAY_PAGE_URL and
+PAY_PAGE_ORIGIN (step 6), SHOPIFY_API_KEY and SHOPIFY_API_SECRET from the NEW production Shopify app (step 7),
+LATEST_APP_VERSION and APP_DOWNLOAD_URL (step 9). Never set BDPAY_FAKE_STORE, BDPAY_FAKE_SHOPIFY or
+BDPAY_FAKE_MAILER.
+check: `supabase secrets list` shows PAY_TOKEN_SECRET, CRON_SECRET, SHOPIFY_SCOPES, SHOPIFY_API_VERSION,
+FUNCTIONS_URL; the digests of PAY_TOKEN_SECRET and CRON_SECRET differ from the staging digests you noted; no
+BDPAY_FAKE_* name is listed.
+
+
+STEP 4 - Deploy every Edge Function
+------------------------------------
+Called by the phone, the pay page, Shopify, the schedules or the uptime monitor (each checks its own signature,
+secret or token, or is public by design like health):
+
+    supabase functions deploy sms-ingest --no-verify-jwt
+    supabase functions deploy device-heartbeat --no-verify-jwt
+    supabase functions deploy device-deactivate --no-verify-jwt
+    supabase functions deploy parser-rules --no-verify-jwt
+    supabase functions deploy sms-status --no-verify-jwt
+    supabase functions deploy pay-session --no-verify-jwt
+    supabase functions deploy shopify-oauth-callback --no-verify-jwt
+    supabase functions deploy shopify-webhooks --no-verify-jwt
+    supabase functions deploy shopify-paylink --no-verify-jwt
+    supabase functions deploy claims-expire --no-verify-jwt
+    supabase functions deploy shopify-sync --no-verify-jwt
+    supabase functions deploy alerts-check --no-verify-jwt
+    supabase functions deploy health --no-verify-jwt
+
+Called by the signed-in app (JWT check stays on):
+
+    supabase functions deploy device-register
+    supabase functions deploy claim-review
+    supabase functions deploy shopify-connect-link
+    supabase functions deploy shopify-status
+    supabase functions deploy alerts-list
+
+check: Dashboard > Edge Functions lists 18 functions, the 13 in the first list with "Verify JWT" off;
+    Invoke-RestMethod https://<ref>.supabase.co/functions/v1/health
+  -> ok = True, db = True.
+
+
+STEP 5 - Vault secrets for the schedules
+-----------------------------------------
+Dashboard > Integrations > Vault > Add new secret:
+  Name: functions_url   Secret: https://<ref>.supabase.co/functions/v1
+  Name: cron_secret     Secret: paste after running, in the same window:
+      Set-Clipboard -Value $cron
+  then:
+      Set-Clipboard -Value ' '; Remove-Variable cron
+
+check: SQL Editor:
+    select name from vault.secrets where name in ('functions_url', 'cron_secret');
+  -> 2 rows; after 10-15 minutes:
+    select jobname, status, start_time from cron.job_run_details order by start_time desc limit 9;
+  -> bdpay-claims-expire, bdpay-shopify-sync and bdpay-alerts-check each "succeeded", 5 minutes apart.
+
+
+STEP 6 - Domain, pay page, email
+---------------------------------
+Pay page (a copy OUTSIDE the repo; a NEW Pages project, never the staging one):
+
+    $dst = Join-Path $env:TEMP 'bdpay_pay_page_prod'
+    New-Item -ItemType Directory -Force $dst | Out-Null
+    Copy-Item pay_page\* -Destination $dst -Include *.html,*.js,*.css
+    notepad "$dst\config.js"
+        USE_MOCK = false;  API_BASE = "https://<ref>.supabase.co/functions/v1";
+    notepad "$dst\index.html"
+        CSP: connect-src 'self' https://<ref>.supabase.co
+    notepad "$dst\privacy.html"
+    notepad "$dst\terms.html"
+    notepad "$dst\download.html"
+        replace REPLACE_ME_SUPPORT_CONTACT with your support phone / WhatsApp / email; the legal REPLACE_ME texts
+        only with the lawyer-reviewed text (release checklist); download values come in step 9.
+
+Cloudflare dashboard > Workers & Pages > Create > Pages > Upload assets > project name bdpay-pay-prod > upload $dst >
+Deploy; then the project > Custom domains > Set up a custom domain > pay.<domain>.
+
+Email sending domain: Resend dashboard > Domains > Add domain > mail.<domain> > add the shown SPF (TXT / MX) and
+DKIM records in Cloudflare > <domain> > DNS (plus a DMARC TXT record "v=DMARC1; p=none" for _dmarc.mail.<domain>)
+> Verify.
+Two production-only Resend API keys, each "Sending access" for mail.<domain> only:
+  "bdpay-prod-alerts" -> into the linked terminal:
+
+    Set-ProdSecret RESEND_API_KEY
+    supabase secrets set "ALERT_FROM_EMAIL=BDPay <alerts@mail.<domain>>"
+    supabase secrets set PAY_PAGE_URL=https://pay.<domain>/ PAY_PAGE_ORIGIN=https://pay.<domain>
+
+  "bdpay-prod-auth-smtp" -> Supabase Dashboard > Authentication > Emails > SMTP Settings > Enable custom SMTP:
+    host smtp.resend.com, port 465, username resend, password = this key (paste in the field),
+    sender email no-reply@mail.<domain>, sender name BDPay.
+Supabase Dashboard > Authentication > Sign In / Providers > Email: Email OTP Length 6, expiry 600 s.
+Authentication > Emails > Templates > Magic Link: subject "BDPay লগইন কোড", body = supabase/templates/otp_bn.html.
+
+check: https://pay.<domain>/?t=x shows the Bangla "not found" page, and /privacy.html, /terms.html,
+/download.html open; Resend shows mail.<domain> "Verified"; signing in on a test phone delivers the 6-digit
+code from no-reply@mail.<domain>; `supabase secrets list` shows RESEND_API_KEY, ALERT_FROM_EMAIL, PAY_PAGE_URL,
+PAY_PAGE_ORIGIN.
+
+
+STEP 7 - Shopify: a SEPARATE production app
+--------------------------------------------
+    cd D:\BDPay\shopify_app
+    shopify app config link
+        (choose "Create a new app", name it "BDPay"; give the configuration the name "prod", so it is saved as
+         shopify.app.prod.toml next to the staging one - never pick the staging app)
+
+In shopify.app.prod.toml fill the REPLACE_ME values with production URLs:
+  application_url = "https://pay.<domain>"
+  redirect_urls = ["https://<ref>.supabase.co/functions/v1/shopify-oauth-callback"]
+  every webhook uri = "https://<ref>.supabase.co/functions/v1/shopify-webhooks"
+In extensions/bdpay-pay-box/src/config.ts set FUNCTIONS_URL = "https://<ref>.supabase.co/functions/v1" and DEV_FAKE
+off (this file is shared with staging: open it before every deploy and check which URL it holds).
+
+    shopify app deploy --config prod
+
+Partner dashboard > Apps > BDPay (production) > Client credentials, in the linked terminal:
+
+    cd D:\BDPay
+    Set-ProdSecret SHOPIFY_API_KEY
+    Set-ProdSecret SHOPIFY_API_SECRET
+
+Partner dashboard > the production app > Distribution > Custom distribution > your pilot merchants' stores
+(do not open the install link; the merchant connects from the BDPay app). API access > request network access
+for checkout UI extensions.
+Public App Store review: prepare separately (privacy URL https://pay.<domain>/privacy.html, support email,
+the compliance webhooks are already built, a demo video). Not submitted as part of this runbook.
+check: `shopify app info --config prod` shows a client ID different from the staging app's; `supabase secrets
+list` shows a SHOPIFY_API_SECRET digest different from the staging digest; your own store's checkout editor
+shows the BDPay block from the production app.
+
+
+STEP 8 - Release keystore (once; keep it forever)
+--------------------------------------------------
+WARNING: losing this keystore (or its password) means every merchant must uninstall and reinstall BDPay to get
+any later update. Keep it outside the project, outside OneDrive / Google Drive / Dropbox, plus offline backups.
+
+keytool comes with Android Studio (adjust the path if yours differs):
+
+    $keytool = "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe"
+    New-Item -ItemType Directory -Force D:\bdpay-keys | Out-Null
+    & $keytool -genkeypair -v -keystore D:\bdpay-keys\bdpay-release.jks -storetype PKCS12 -keyalg RSA -keysize 4096 -validity 10000 -alias bdpay
+        (type the password at its prompts - never -storepass / -keypass on the command line; answer the
+         name questions with your business details)
+
+Write android/key.properties by hand in Notepad (never with a command that holds the passwords):
+
+    notepad D:\BDPay\app\android\key.properties
+        storeFile=D:/bdpay-keys/bdpay-release.jks
+        storePassword=<the keystore password>
+        keyAlias=bdpay
+        keyPassword=<the same password (PKCS12 uses one password)>
+
+The project folder must not be in a cloud-synced folder while key.properties exists (it holds the password).
+Back up D:\bdpay-keys\bdpay-release.jks to two offline USB drives kept in different places; the password goes in
+your password manager.
+The staging keystore (D:\bdpay-keys-staging\, spec 14 runbook step 9) is a different file: before every
+production build open key.properties and check storeFile names D:/bdpay-keys/bdpay-release.jks.
+check: `& $keytool -list -v -keystore D:\bdpay-keys\bdpay-release.jks -alias bdpay` (password at the prompt) shows
+alias bdpay; write its "SHA256:" certificate fingerprint (public, not secret) into ops/release_checklist.txt;
+both USB copies open with the same command.
+
+
+STEP 9 - Build, publish, announce the version
+----------------------------------------------
+    cd D:\BDPay\app
+    $anon = Read-Secret "production anon key (paste, Enter)"
+    flutter build apk --release --obfuscate --split-debug-info=build/symbols --dart-define=SUPABASE_URL=https://<ref>.supabase.co --dart-define=SUPABASE_ANON_KEY=$anon --dart-define=SITE_URL=https://pay.<domain>
+    Remove-Variable anon
+
+Keep the symbols privately (they are needed to read crash traces; `flutter clean` would remove them):
+
+    New-Item -ItemType Directory -Force D:\bdpay-release\1.0.0 | Out-Null
+    Copy-Item -Recurse build\symbols D:\bdpay-release\1.0.0\symbols
+
+Size and hash (Cloudflare Pages allows at most 25 MiB per file):
+
+    $apk = "build\app\outputs\flutter-apk\app-release.apk"
+    [math]::Round((Get-Item $apk).Length / 1MB, 1)
+    Get-FileHash -Algorithm SHA256 $apk
+        (if the size is 25 or more, build again with --split-per-abi added and publish
+         build\app\outputs\flutter-apk\app-arm64-v8a-release.apk instead; hash and size of that file)
+
+Certificate (apksigner is in the Android SDK build-tools folder):
+
+    & "D:\tools\android-sdk\build-tools\<version>\apksigner.bat" verify --print-certs $apk
+
+Copy the APK as bdpay-1.0.0.apk into $dst (step 6 folder); in $dst\download.html set REPLACE_ME_VERSION = 1.0.0,
+REPLACE_ME_SIZE = the size in MB, REPLACE_ME_SHA256 = the hash, REPLACE_ME_APK_FILE = bdpay-1.0.0.apk; upload $dst
+again as a new deployment of bdpay-pay-prod.
+
+    cd D:\BDPay
+    supabase secrets set LATEST_APP_VERSION=1.0.0 APP_DOWNLOAD_URL=https://pay.<domain>/download.html
+    supabase unlink
+
+check: apksigner's "SHA-256 digest" of the signer certificate equals the production fingerprint from step 8
+(never the staging one); https://pay.<domain>/download.html shows 1.0.0, the size and the hash; a file
+downloaded from that page gives the same Get-FileHash value; Test-Path supabase\.temp\project-ref -> False.
+
+
+STEP 10 - Monitoring
+---------------------
+A free uptime monitor (for example UptimeRobot; check its current free plan), two monitors, every 5 minutes,
+alerts to your email and phone app:
+  1. HTTPS keyword monitor: https://<ref>.supabase.co/functions/v1/health, keyword "db":true
+  2. HTTPS monitor: https://pay.<domain>/
+No key or token goes into the monitor.
+Weekly: run ops/e2e_queries.sql in the SQL Editor (verification times, heartbeat gaps, rejected SMS, order syncs,
+open alerts).
+Test alert email (plan 15 D225): with your own store connected and your own phone signed out for 35 minutes, a
+noActiveDevice alert opens and emails you (or switch the signed-in phone off for 16 minutes: phoneSilent).
+check: both monitors show "Up" and their test notification reached you; the test alert email arrived from
+alerts@mail.<domain>.
+
+
+STEP 11 - Backups and a test restore
+-------------------------------------
+The day after step 2: Dashboard > Database > Backups -> the first daily backup is listed.
+Test restore: Database > Backups > Restore to a new project (or the current equivalent - check Supabase's backup
+docs) into a scratch project "bdpay-restore-test". In both projects' SQL Editor:
+    select (select count(*) from public.merchants) as merchants, (select count(*) from public.parser_rules) as rules;
+When done, PAUSE the scratch project (Project Settings > General > Pause) - no data is deleted.
+check: the backup is listed; the restored project shows the same counts as production at backup time; the
+scratch project is paused.
+
+
+AFTER THE RUNBOOK - onboarding each merchant
+--------------------------------------------
+- Untested operators (no real SMS samples passing in tests/real_sms) are switched OFF in the merchant's app:
+  সেটিংস > operator switches. Turn one on only after its samples pass (plan 15 D232).
+- Complete ops/release_checklist.txt with all yes before the first real merchant.
+- Keep ops/incident_playbook.txt at hand.

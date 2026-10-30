@@ -1,0 +1,93 @@
+BDPay incident playbook (spec 15)
+==================================
+
+Short steps for each case. Never delete records. Lookups are read-only SELECTs in Dashboard > SQL Editor of the
+production project. Query output stays on your screen: never paste it into tickets, chats or repo files (it can
+hold TrxIDs and payer numbers). Replace <...> with the real value only in the SQL Editor.
+
+
+CASE 1 - A merchant's phone is offline (phoneSilent alert)
+1. Call the merchant.
+2. Go through: phone has power and is on; mobile data or Wi-Fi works; battery saver off for BDPay; auto-start on
+   (Xiaomi / Oppo / Vivo / Realme); BDPay was not force-stopped (open it once).
+3. Customers' pending payments verify by themselves when the phone is back; nothing has to be re-entered.
+4. Check: the alert resolves within about 5 minutes after the phone is back:
+    select a.kind, a.status, a.opened_at, a.resolved_at
+    from public.alerts a
+    where a.merchant_id = '<merchant id>' and a.kind = 'phoneSilent'
+    order by a.opened_at desc limit 3;
+
+
+CASE 2 - Payments stuck "যাচাই বাকি"
+1. Check the merchant's phone health (Case 1 steps; devices.last_seen_at):
+    select d.id, d.name, d.status, d.last_seen_at, d.last_sms_permission, d.last_monitoring, d.last_battery_ok
+    from public.devices d where d.merchant_id = '<merchant id>';
+2. Check rejected SMS by reason for that merchant (counts only):
+    select s.operator, s.reject_reason, count(*)
+    from public.sms_messages s
+    where s.merchant_id = '<merchant id>' and s.status = 'rejected' and s.server_received_at > now() - interval '2 days'
+    group by s.operator, s.reject_reason;
+3. Many parseFailed or notIncoming for one operator = a new SMS layout. Ask the merchant for one example SMS
+   (numbers replaced, names -> X), add it to tests/real_sms first, fix both parser_rules.json copies with a new
+   version on every rule, run all tests, then load the new version (production runbook step 2, rules part).
+   No app update is needed: phones download the new rules with the next heartbeat.
+
+
+CASE 3 - Shopify "Paid" not set (syncFailed alert)
+1. The payment is still verified in BDPay; tell the merchant to mark the order paid by hand in Shopify admin.
+2. Check whether the store needs reconnecting:
+    select st.shop_domain, st.status, st.last_error from public.stores st where st.merchant_id = '<merchant id>';
+   last_error = reconnectNeeded -> the merchant reconnects Shopify from the BDPay app.
+3. Check Shopify's status page (https://www.shopifystatus.com) and the order syncs:
+    select o.id, o.status, o.attempts, o.last_error, o.next_attempt_at
+    from public.order_syncs o where o.merchant_id = '<merchant id>' and o.status <> 'done';
+
+
+CASE 4 - Server or database down
+1. Phones keep SMS queued and send them when the server is back; nothing is lost.
+2. Check https://status.supabase.com and the uptime monitor; the health function answers db: false or not at all.
+3. Tell merchants that verification is delayed, not lost. After recovery: e2e_queries.sql queries 4 and 5.
+
+
+CASE 5 - Suspected fraud (a TrxID used by the wrong customer)
+1. Look up the claim, session and match for the TrxID (read-only):
+    select c.id as claim_id, c.status, c.operator, c.created_at, se.order_ref, se.amount_poisha, se.status as session_status,
+           m.id as match_id, m.method, m.created_at as matched_at
+    from public.payment_claims c
+    join public.payment_sessions se on se.id = c.session_id
+    left join public.matches m on m.claim_id = c.id
+    where c.merchant_id = '<merchant id>' and c.trx_id = upper(trim('<TrxID>'))
+    order by c.created_at;
+2. The merchant decides (refund, cancel the order in Shopify, contact the customer). BDPay records are never
+   deleted or edited; a correction is a new audit_log entry only.
+
+
+CASE 6 - A secret leaked
+Rotate it at every place it lives, then check:
+- PAY_TOKEN_SECRET: `supabase secrets set "PAY_TOKEN_SECRET=$v"` with $v = New-RandomSecret (production runbook
+  helpers). All open pay links stop working; customers reopen the pay page from the Shopify order page.
+- CRON_SECRET: a new value with `supabase secrets set` AND the same value in Dashboard > Vault > cron_secret (edit
+  the secret). Otherwise the three schedules get 401 every 5 minutes.
+- SHOPIFY_API_SECRET: rotate it in the Shopify Partner dashboard first (app > Client credentials), then
+  `Set-ProdSecret SHOPIFY_API_SECRET`.
+- RESEND_API_KEY (alerts) or the Auth SMTP key: create a new key in Resend, set it (secret / SMTP field), then
+  revoke the old key in Resend.
+- service_role or anon key: Dashboard > Project Settings > API Keys (rotate). A new anon key needs a new APK
+  build (production runbook step 9).
+- Release keystore password: a leaked password without the file is not enough to sign; keep the file safe and
+  change the password with keytool -storepasswd (at its prompt), then update key.properties in Notepad.
+check after any rotation: health green; the cron history shows "succeeded" for the next run; a test pay link from
+a new order works.
+
+
+CASE 7 - A phone stolen
+1. The merchant logs in on a new phone (it registers as a new device).
+2. Revoke the old device. DATA CHANGE - run the SELECT first and check that exactly one row is shown:
+    select d.id, d.name, d.status, d.last_seen_at from public.devices d
+    where d.merchant_id = '<merchant id>' and d.id = '<old device id>';
+   then, as one statement each:
+    update public.devices set status = 'revoked' where id = '<old device id>' and merchant_id = '<merchant id>';
+    insert into public.audit_log (merchant_id, actor_type, actor_id, action, entity, entity_id, data)
+    values ('<merchant id>', 'system', null, 'device.revoke', 'device', '<old device id>', '{"reason": "stolen"}');
+3. The stolen phone's next request gets "device revoked"; it can no longer send SMS or see results.
+check: the device row shows status revoked; the audit_log row exists; the new phone shows in devices as active.

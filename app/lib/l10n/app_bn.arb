@@ -1,0 +1,468 @@
+{
+  "@@locale": "bn",
+  "appTitle": "BDPay SMS Verifier",
+  "headerBrand": "BDPay",
+  "headerProduct": "SMS Verifier",
+  "headerSubtitle": "পেমেন্ট যাচাই অ্যাপ",
+  "online": "অনলাইন",
+  "offline": "অফলাইন",
+  "tabHome": "হোম",
+  "tabTransactions": "লেনদেন",
+  "tabQueue": "পাঠানো বাকি",
+  "tabDevLab": "পরীক্ষা",
+  "tabSettings": "সেটিংস",
+  "opBkash": "bKash",
+  "opNagad": "Nagad",
+  "opRocket": "Rocket",
+  "opUpay": "Upay",
+  "verifyPending": "যাচাই বাকি",
+  "verifyVerified": "পেমেন্ট নিশ্চিত ✓",
+  "verifyMismatch": "টাকা মেলেনি",
+  "verifyRejected": "বাতিল",
+  "syncQueued": "পাঠানো বাকি",
+  "syncSending": "পাঠানো হচ্ছে…",
+  "syncSent": "পাঠানো হয়েছে",
+  "syncFailed": "আবার চেষ্টা হবে",
+  "kindPayment": "পেমেন্ট",
+  "kindReceived": "টাকা গ্রহণ",
+  "justNow": "এইমাত্র",
+  "minutesAgo": "{n} মিনিট আগে",
+  "@minutesAgo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{n} ঘণ্টা আগে",
+  "@hoursAgo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{n} দিন আগে",
+  "@daysAgo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "noValue": "—",
+  "trxLabel": "Trx: {trxId}",
+  "@trxLabel": {
+    "placeholders": {
+      "trxId": {
+        "type": "String"
+      }
+    }
+  },
+  "payerLine": "প্রেরক: {payer} • {kind}",
+  "@payerLine": {
+    "placeholders": {
+      "payer": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "monitoringOnSubtitle": "এসএমএস দেখা হচ্ছে",
+  "monitoringOffSubtitle": "মনিটরিং বন্ধ — নতুন পেমেন্ট ধরা হবে না",
+  "serverConnected": "সার্ভার সংযুক্ত",
+  "serverDisconnected": "সার্ভারে সংযোগ নেই",
+  "lastContact": " • শেষ সংযোগ {time}",
+  "@lastContact": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "pingOk": "সার্ভার সংযুক্ত আছে",
+  "healthTitle": "ডিভাইস স্বাস্থ্য",
+  "healthAllOk": "সব ঠিক আছে ✓",
+  "healthProblems": "{n} টি সমস্যা",
+  "@healthProblems": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "fix": "ঠিক করুন",
+  "healthSmsTitle": "এসএমএস পড়ার অনুমতি",
+  "healthSmsOk": "দেওয়া আছে",
+  "healthSmsProblem": "অনুমতি দিন — না দিলে অ্যাপ কাজ করবে না",
+  "healthBatteryTitle": "ব্যাটারি সেভার থেকে বাদ",
+  "healthBatteryOk": "ঠিক আছে",
+  "healthBatteryProblem": "চালু থাকলে ফোন অ্যাপটি বন্ধ করে দিতে পারে",
+  "healthInternetTitle": "ইন্টারনেট",
+  "healthInternetOk": "সংযুক্ত",
+  "healthInternetProblem": "নেই — এসএমএস ফোনে জমা থাকবে",
+  "healthMonitoringTitle": "এসএমএস মনিটরিং",
+  "healthMonitoringOk": "চালু",
+  "healthMonitoringProblem": "বন্ধ আছে",
+  "healthLastSmsTitle": "সর্বশেষ এসএমএস",
+  "healthLastSmsNone": "এখনো আসেনি",
+  "todayTotalLabel": "আজ নিশ্চিত হওয়া মোট টাকা",
+  "todayTotalCaption": "শুধু সার্ভার যেগুলো নিশ্চিত করেছে",
+  "countVerified": "নিশ্চিত",
+  "countPending": "যাচাই বাকি",
+  "countMismatchRejected": "মেলেনি / বাতিল",
+  "sendPendingNow": "⟳ বাকি {n} টি এখনই পাঠান",
+  "@sendPendingNow": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "allSent": "সব পাঠানো হয়েছে",
+  "someFailed": "{f} টি পাঠানো যায়নি — পরে আবার চেষ্টা হবে",
+  "@someFailed": {
+    "placeholders": {
+      "f": {
+        "type": "int"
+      }
+    }
+  },
+  "devLabButton": "⚗ এসএমএস পরীক্ষা (ডেভেলপার)",
+  "operatorsTitle": "অপারেটর",
+  "operatorCount": "{count} টি",
+  "@operatorCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "operatorOff": "বন্ধ",
+  "latestTitle": "সর্বশেষ লেনদেন",
+  "seeAll": "সব দেখুন ({total})",
+  "@seeAll": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "latestEmpty": "এখনো কোনো লেনদেন নেই",
+  "differenceLess": "{amount} কম",
+  "@differenceLess": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "differenceMore": "{amount} বেশি",
+  "@differenceMore": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "searchHint": "🔍 TrxID বা প্রেরকের নম্বর",
+  "allOperators": "সব অপারেটর",
+  "statusAll": "সব",
+  "statusVerified": "নিশ্চিত",
+  "statusPending": "যাচাই বাকি",
+  "statusMismatch": "মেলেনি",
+  "statusRejected": "বাতিল",
+  "reviewBanner": "{n} টি পেমেন্টে টাকা মেলেনি — দেখুন",
+  "@reviewBanner": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "resultCount": "{n} টি লেনদেন",
+  "@resultCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "noResultsTitle": "কিছু পাওয়া যায়নি",
+  "noResultsHint": "ফিল্টার বদলে আবার চেষ্টা করুন",
+  "detailTrxId": "TrxID",
+  "detailPayer": "প্রেরকের নম্বর",
+  "detailKind": "ধরন",
+  "detailReference": "রেফারেন্স",
+  "detailBalance": "নতুন ব্যালেন্স",
+  "detailTime": "সময়",
+  "copied": "কপি হয়েছে",
+  "serverReplyTitle": "সার্ভারের উত্তর",
+  "serverReplyState": "অবস্থা",
+  "serverReplyCode": "কোড",
+  "serverReplyNone": "এখনো উত্তর আসেনি",
+  "rawSmsTitle": "মূল এসএমএস",
+  "close": "বন্ধ করুন",
+  "sendNow": "⟳ এখনই পাঠান",
+  "reviewNeeded": "রিভিউ দরকার",
+  "reviewOrder": "অর্ডার {orderRef}",
+  "@reviewOrder": {
+    "placeholders": {
+      "orderRef": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewExpected": "অর্ডারের টাকা",
+  "reviewSmsAmount": "এসএমএস-এ টাকা",
+  "reviewDifference": "পার্থক্য",
+  "reviewNoOrder": "কোনো অর্ডারের সাথে যুক্ত নয়",
+  "approve": "অনুমোদন দিন",
+  "reject": "বাতিল করুন",
+  "note": "নোট (ঐচ্ছিক)",
+  "no": "না",
+  "yesConfirm": "হ্যাঁ, নিশ্চিত",
+  "approvedToast": "অনুমোদন দেওয়া হয়েছে",
+  "rejectedToast": "বাতিল করা হয়েছে",
+  "reviewOffline": "ইন্টারনেট নেই — পরে চেষ্টা করুন",
+  "reviewNotAllowed": "এটি আর রিভিউ করা যাবে না",
+  "queueInfoSafe": "ইন্টারনেট না থাকলেও এসএমএস ফোনে নিরাপদে জমা থাকে।",
+  "queueInfoAuto": "সংযোগ ফিরলে নিজে থেকেই পাঠানো হবে।",
+  "queueInfoManual": "অটো পাঠানো বন্ধ আছে — নিচের বোতাম চাপুন।",
+  "queueInfoNoDuplicate": "একই লেনদেন দুবার গণনা হবে না।",
+  "queueTitle": "পাঠানো বাকি ({n})",
+  "@queueTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "internetYes": "ইন্টারনেট আছে",
+  "internetNo": "ইন্টারনেট নেই",
+  "sendAll": "☁ সব পাঠান",
+  "queuePayerLine": "প্রেরক: {payer} • {time}",
+  "@queuePayerLine": {
+    "placeholders": {
+      "payer": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "retryFailedLine": "{retryCount} বার চেষ্টা ব্যর্থ • {message}",
+  "@retryFailedLine": {
+    "placeholders": {
+      "retryCount": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "stuckWarning": "বারবার ব্যর্থ — ইন্টারনেট বা সার্ভার চেক করুন",
+  "staleWarning": "২৪ ঘণ্টার বেশি পুরনো — গ্রাহকের অর্ডার বাতিল হয়ে যেতে পারে",
+  "details": "বিস্তারিত",
+  "sendOne": "⟳ পাঠান",
+  "autoSent": "ইন্টারনেট ফিরেছে — {k} টি পাঠানো হয়েছে",
+  "@autoSent": {
+    "placeholders": {
+      "k": {
+        "type": "int"
+      }
+    }
+  },
+  "queueEmptyTitle": "সব পাঠানো হয়েছে!",
+  "queueEmptyHint": "কোনো এসএমএস বাকি নেই।",
+  "accountMerchant": "মার্চেন্ট",
+  "accountAgent": "এজেন্ট",
+  "simSlot1": "সিম ১",
+  "simSlot2": "সিম ২",
+  "simUnknown": "জানি না",
+  "yes": "হ্যাঁ",
+  "loginEmailPrompt": "আপনার ইমেইল দিন",
+  "sendCode": "কোড পাঠান",
+  "errInvalidEmail": "সঠিক ইমেইল দিন",
+  "errTooSoon": "একটু পরে আবার চেষ্টা করুন",
+  "codeSentTo": "{email} -এ ৬ সংখ্যার কোড পাঠানো হয়েছে",
+  "@codeSentTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyCode": "যাচাই করুন",
+  "errWrongCode": "কোড ভুল — আবার দেখুন",
+  "resendCode": "আবার কোড পাঠান",
+  "resendIn": "{s} সেকেন্ড পরে আবার পাঠানো যাবে",
+  "@resendIn": {
+    "placeholders": {
+      "s": {
+        "type": "int"
+      }
+    }
+  },
+  "changeEmail": "ইমেইল বদলান",
+  "businessNamePrompt": "আপনার ব্যবসার নাম",
+  "startButton": "শুরু করুন",
+  "setupTitle": "সেটআপ বাকি",
+  "addWalletTitle": "ওয়ালেট যোগ করুন",
+  "connectShopify": "Shopify যুক্ত করুন",
+  "shopifyTitle": "Shopify স্টোর",
+  "shopifyPrompt": "আপনার Shopify স্টোরের ঠিকানা দিন",
+  "shopifyHint": "yourstore.myshopify.com",
+  "errShopDomain": "শুধু .myshopify.com ঠিকানা দিন",
+  "shopifyConnecting": "যুক্ত হচ্ছে…",
+  "shopifyConnectedAgo": "যুক্ত হয়েছে {time}",
+  "@shopifyConnectedAgo": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "shopifyTest": "সংযোগ পরীক্ষা",
+  "shopifyTestOk": "Shopify সংযুক্ত আছে",
+  "shopifyTestFail": "সংযোগ পাওয়া যায়নি",
+  "shopifyDisconnect": "বিচ্ছিন্ন করুন",
+  "walletsTitle": "ওয়ালেট",
+  "walletMeta": "{type} • {sim}",
+  "@walletMeta": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "sim": {
+        "type": "String"
+      }
+    }
+  },
+  "addWalletButton": "+ ওয়ালেট যোগ করুন",
+  "lastWalletConfirm": "কোনো সক্রিয় ওয়ালেট থাকবে না — পেমেন্ট যাচাই বন্ধ হয়ে যাবে। নিশ্চিত?",
+  "walletNumberLabel": "ওয়ালেট নম্বর",
+  "accountTypeLabel": "অ্যাকাউন্ট টাইপ",
+  "simLabel": "সিম",
+  "walletLabelLabel": "লেবেল (ঐচ্ছিক)",
+  "accountTypeNote": "ব্যবসার পেমেন্ট নিতে মার্চেন্ট অ্যাকাউন্ট ব্যবহার করুন। ব্যক্তিগত অ্যাকাউন্ট সমর্থিত নয়।",
+  "save": "সংরক্ষণ করুন",
+  "errWalletNumber": "সঠিক নম্বর দিন (01XXXXXXXXX)",
+  "errWalletDuplicate": "এই নম্বর আগেই যোগ করা আছে",
+  "errSimTaken": "এই সিমে এই অপারেটরের আরেকটি ওয়ালেট আছে",
+  "deviceSectionTitle": "এই ডিভাইস",
+  "deviceNameLabel": "ডিভাইস নাম",
+  "deviceIdLabel": "ডিভাইস আইডি",
+  "autoSendTitle": "সাথে সাথে পাঠান",
+  "autoSendHint": "এসএমএস আসামাত্র সার্ভারে যাবে",
+  "saveSettings": "💾 সংরক্ষণ করুন",
+  "settingsSaved": "সেটিংস সংরক্ষিত হয়েছে",
+  "smsOperatorsTitle": "কোন অপারেটরের এসএমএস দেখবে",
+  "developerTitle": "ডেভেলপার মোড",
+  "developerHint": "পরীক্ষার টুল দেখাবে",
+  "simulateOffline": "অফলাইন সিমুলেট",
+  "accountTitle": "অ্যাকাউন্ট",
+  "businessNameLabel": "ব্যবসার নাম",
+  "emailLabel": "ইমেইল",
+  "logout": "লগ আউট",
+  "logoutBlocked": "আগে বাকি {n} টি এসএমএস পাঠান",
+  "@logoutBlocked": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "logoutConfirm": "লগ আউট করবেন? এই ফোনে পেমেন্ট যাচাই বন্ধ হবে।",
+  "privacyNote": "এই অ্যাপ শুধু bKash, Nagad, Rocket ও Upay-এর এসএমএস পড়ে। ব্যক্তিগত মেসেজ পড়া বা পাঠানো হয় না।",
+  "appVersionLine": "ভার্সন {version}",
+  "@appVersionLine": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "keepStored": "নেওয়া হয়েছে",
+  "keepDuplicate": "আগেই নেওয়া হয়েছে (ডুপ্লিকেট)",
+  "keepMonitoringOff": "মনিটরিং বন্ধ",
+  "keepSenderNotTrusted": "প্রেরক বিশ্বস্ত নয় — নেওয়া হয়নি",
+  "keepOperatorOff": "এই অপারেটর বন্ধ",
+  "keepBlocked": "OTP/অফার — নেওয়া হয়নি",
+  "keepNotIncoming": "টাকা গ্রহণের এসএমএস নয় — নেওয়া হয়নি",
+  "unknownFormat": "অজানা ফরম্যাট",
+  "autoStartTitle": "অটোস্টার্ট চালু করুন",
+  "autoStartHint": "ফোনের সেটিং-এ BDPay-এর অটোস্টার্ট ও ব্যাকগ্রাউন্ড চালু রাখুন",
+  "autoStartForceStop": "অ্যাপ জোর করে বন্ধ করবেন না",
+  "openSettings": "সেটিং খুলুন",
+  "autoStartDone": "করেছি",
+  "labTitle": "এসএমএস পরীক্ষা (ডেভেলপার)",
+  "labInfo": "আসল টাকা ছাড়াই পার্সিং, ভুয়া এসএমএস ঠেকানো ও ডুপ্লিকেট চেক পরীক্ষা করুন।",
+  "labTemplates": "নমুনা টেমপ্লেট নির্বাচন করুন:",
+  "tplBkash": "bKash পেমেন্ট প্রাপ্তি",
+  "tplNagad": "Nagad টাকা প্রাপ্তি",
+  "tplRocket": "Rocket টাকা প্রাপ্তি",
+  "tplUpay": "Upay পেমেন্ট",
+  "tplBanglaBkash": "বাংলা bKash মেসেজ",
+  "tplFake": "⚠ ভুয়া এসএমএস",
+  "tplOtp": "⚠ OTP",
+  "tplOutgoing": "⚠ টাকা পাঠানো (outgoing)",
+  "tplHtml": "⚠ HTML ইনজেকশন",
+  "labSenderLabel": "এসএমএস প্রেরক হেডার (যেমন: bKash, 16247, NAGAD)",
+  "labBodyLabel": "ইনকামিং এসএমএস টেক্সট",
+  "labParse": "পার্স করে দেখুন",
+  "labInject": "⚡ অ্যাপে পাঠান",
+  "labResultTitle": "পার্সিং ফলাফল",
+  "labValid": "ভ্যালিড এমএফএস",
+  "labInvalid": "অকার্যকর",
+  "labOperator": "চিহ্নিত অপারেটর",
+  "labTrxId": "Transaction ID (TrxID)",
+  "labAmount": "টাকার পরিমাণ",
+  "labPayer": "প্রেরক মোবাইল",
+  "labNotFound": "পাওয়া যায়নি",
+  "labErrors": "ত্রুটি",
+  "parseErrUnknownSender": "প্রেরক চেনা নয়",
+  "parseErrNoTrxId": "TrxID পাওয়া যায়নি",
+  "parseErrNoAmount": "টাকার পরিমাণ পাওয়া যায়নি",
+  "appNotConfigured": "অ্যাপ কনফিগার করা হয়নি",
+  "errShopTaken": "এই স্টোর অন্য একটি BDPay অ্যাকাউন্টে যুক্ত",
+  "shopifyNotYet": "এখনো যুক্ত হয়নি — আবার চেষ্টা করুন",
+  "shopifyReconnectNeeded": "Shopify-এর সংযোগ শেষ হয়ে গেছে",
+  "shopifyReconnect": "আবার যুক্ত করুন",
+  "shopifyDisconnectHow": "Shopify বিচ্ছিন্ন করতে: Shopify অ্যাডমিন > Apps > BDPay > Uninstall. এরপর নতুন অর্ডার আর যাচাই হবে না।",
+  "okButton": "ঠিক আছে",
+  "shopifyGuideTitle": "সেটআপ গাইড",
+  "shopifyGuideStep1": "BDPay অ্যাপে Shopify যুক্ত করুন (সেটিংস > Shopify স্টোর).",
+  "shopifyGuideStep2": "Shopify অ্যাডমিন > Settings > Payments > Manual payment methods > Create custom payment method. নামে অবশ্যই \"BDPay\" শব্দটি রাখুন, যেমন: \"bKash / Nagad (BDPay)\".",
+  "shopifyGuideStep3": "Shopify অ্যাডমিন > Settings > Checkout > Customize: Thank you পেজে এবং Order status পেজে \"BDPay pay box\" ব্লক যোগ করে Save করুন.",
+  "shopifyGuideStep4": "স্টোরের মুদ্রা BDT রাখুন.",
+  "shopifyGuideStep5": "একটি পরীক্ষামূলক অর্ডার দিয়ে দেখুন \"এখনই পেমেন্ট করুন\" বোতাম দেখা যাচ্ছে কিনা.",
+  "deviceLimitTitle": "এই অ্যাকাউন্টে ৩টি ফোন যুক্ত আছে",
+  "deviceLimitHint": "অন্য একটি ফোন থেকে লগ আউট করে আবার চেষ্টা করুন",
+  "deviceLimitRetry": "আবার চেষ্টা করুন",
+  "deviceDisconnected": "এই ফোন BDPay থেকে বিচ্ছিন্ন — আবার লগইন করুন",
+  "logoutNeedsInternet": "লগ আউট করতে ইন্টারনেট দরকার",
+  "rulesVersion": "নিয়ম সংস্করণ: {version}",
+  "@rulesVersion": {
+    "placeholders": {
+      "version": {
+        "type": "int"
+      }
+    }
+  },
+  "updateAvailable": "নতুন ভার্সন {version} এসেছে",
+  "@updateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateDownload": "ডাউনলোড করুন",
+  "privacyPolicyLink": "গোপনীয়তা নীতি",
+  "termsLink": "শর্তাবলি"
+}

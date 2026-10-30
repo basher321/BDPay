@@ -1,0 +1,30 @@
+BDPay release checklist (spec 15) - go / no-go
+================================================
+
+Every line must be "yes" before the first real merchant. Tick one box per line.
+No secret, password or key goes into this file.
+
+[ ] yes  [ ] no   Spec 14 checklist all PASS (or documented and fixed).
+[ ] yes  [ ] no   Real SMS rules tested for every operator offered; untested operators turned off by default.
+[ ] yes  [ ] no   Production secrets are all new; no BDPAY_FAKE_* set; staging and production Shopify apps are separate.
+[ ] yes  [ ] no   Advisors show no errors; RLS on every table; supabase test db passes on the release commit.
+[ ] yes  [ ] no   health is green; schedules running; a test alert email arrives from production.
+[ ] yes  [ ] no   Privacy policy and terms reviewed by a lawyer and published; MFS account terms and Bangladesh Bank payment rules checked by a lawyer for the way BDPay is used.
+[ ] yes  [ ] no   Keystore backed up offline; APK SHA-256 published.
+[ ] yes  [ ] no   One full real payment on production with my own store passes before the first merchant.
+[ ] yes  [ ] no   Support contact (phone/WhatsApp/email) written in the app settings footer and on download.html.
+
+Notes for the lines above
+- Untested operators: switched off per merchant during onboarding (production runbook, after step 11).
+- Support contact in the app settings footer: the app has no support-contact setting (plan 15 D220 was not
+  approved). Until a spec adds it, answer this line from download.html, privacy.html and terms.html only, and
+  write that in "Notes" below - or write the missing app part as a new spec.
+
+Release record (public values only)
+- App version: ______    APK SHA-256: ____________________________________________
+- Production signing certificate SHA-256 fingerprint (runbook step 8): _____________________________
+- Rules version loaded on production: ______
+- Release commit / date: ______________________
+- Checked by: ______________________   Date: ____________
+
+Notes:

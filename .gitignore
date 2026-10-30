@@ -1,0 +1,38 @@
+# Spec 15: secrets, keys and signing - never in the repo.
+.env
+.env.*
+**/.env
+**/.env.*
+key.properties
+**/key.properties
+*.jks
+**/*.jks
+*.keystore
+**/*.keystore
+*.p12
+**/*.p12
+
+# Flutter obfuscation symbols (--split-debug-info=build/symbols, run in app/): keep privately, never commit.
+build/symbols/
+**/build/symbols/
+
+# Supabase CLI link state (project ref, pooler URL).
+supabase/.temp/
+supabase/.branches/
+
+# Build output and tool caches.
+build/
+**/build/
+.dart_tool/
+**/.dart_tool/
+node_modules/
+**/node_modules/
+
+# Local demo builds (BDPay-demo.apk) - never commit.
+demo/
+
+# Local tools and documents - never commit.
+.venv/
+.claude/
+*.docx
+~$*

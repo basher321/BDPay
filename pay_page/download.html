@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Spec 15: the same CSP as index.html. This page is static text: no script, no API call. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; require-trusted-types-for 'script'">
+  <title>অ্যাপ ডাউনলোড — BDPay</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="logo" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path class="logo-shield" d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+    </div>
+    <span class="brand">BDPay</span>
+  </header>
+  <main class="page">
+    <h1>BDPay অ্যাপ ডাউনলোড</h1>
+
+    <p class="notice-red" role="note">শুধু এই পেজ থেকেই BDPay ডাউনলোড করুন। WhatsApp, Facebook বা অন্য কোথাও থেকে পাঠানো APK ফাইল ইনস্টল করবেন না। BDPay কখনো আপনার PIN বা OTP চায় না।</p>
+
+    <section class="card surface legal">
+      <h2>সংস্করণ</h2>
+      <dl class="facts">
+        <dt>ভার্সন</dt><dd>REPLACE_ME_VERSION</dd>
+        <dt>ফাইলের আকার</dt><dd>REPLACE_ME_SIZE</dd>
+        <dt>SHA-256</dt><dd class="hash">REPLACE_ME_SHA256</dd>
+      </dl>
+      <p><a class="button-link" href="REPLACE_ME_APK_FILE" download>ডাউনলোড করুন (Android 8 বা নতুন)</a></p>
+    </section>
+
+    <section class="card surface legal">
+      <h2>ইনস্টল করার ধাপ</h2>
+      <ol class="steps">
+        <li>উপরের বোতাম চেপে ফাইলটি ডাউনলোড করুন।</li>
+        <li>অজানা উৎস থেকে ইনস্টল চালু করুন: সেটিংস › অ্যাপ › Chrome (যে ব্রাউজারে ডাউনলোড করেছেন) › অজানা অ্যাপ ইনস্টল করুন › অনুমতি দিন।</li>
+        <li>ডাউনলোড ফোল্ডার থেকে ফাইলটি খুলে "ইনস্টল" চাপুন।</li>
+        <li>ইনস্টল শেষে আবার একই জায়গায় গিয়ে "অজানা অ্যাপ ইনস্টল" বন্ধ করে দিন।</li>
+        <li>BDPay খুলুন, এসএমএস অনুমতি দিন এবং ইমেইল দিয়ে লগইন করুন।</li>
+      </ol>
+      <p class="muted">নতুন ভার্সন এলে অ্যাপের হোমে সবুজ কার্ড দেখাবে। একই ধাপে পুরোনো অ্যাপের উপরেই ইনস্টল করুন — আপনার তথ্য থেকে যাবে।</p>
+    </section>
+
+    <section class="card surface legal">
+      <h2>ফাইলটি আসল কিনা যাচাই (ঐচ্ছিক)</h2>
+      <p class="muted">কম্পিউটারে ডাউনলোড করলে ফাইলের SHA-256 উপরের মানের সাথে হুবহু মিলিয়ে নিন। না মিললে ইনস্টল করবেন না।</p>
+    </section>
+
+    <section class="card surface legal">
+      <h2>সাহায্য</h2>
+      <p>REPLACE_ME_SUPPORT_CONTACT</p>
+    </section>
+  </main>
+  <footer class="site-foot">
+    <a href="privacy.html">গোপনীয়তা নীতি</a>
+    <span aria-hidden="true">·</span>
+    <a href="terms.html">শর্তাবলি</a>
+    <span aria-hidden="true">·</span>
+    <a href="download.html">অ্যাপ ডাউনলোড</a>
+  </footer>
+</body>
+</html>

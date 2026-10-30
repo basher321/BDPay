@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Spec 15: the same CSP as index.html. This page is static text: no script, no API call. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; require-trusted-types-for 'script'">
+  <title>গোপনীয়তা নীতি — BDPay</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="logo" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path class="logo-shield" d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+    </div>
+    <span class="brand">BDPay</span>
+  </header>
+  <main class="page">
+    <p class="notice-red" role="note">আইনজীবীর পর্যালোচনা প্রয়োজন — এই লেখাটি খসড়া, আইনজীবী পর্যালোচনা না করা পর্যন্ত চূড়ান্ত নয়।</p>
+    <h1>গোপনীয়তা নীতি</h1>
+    <p class="muted">সর্বশেষ হালনাগাদ: REPLACE_ME_DATE</p>
+
+    <section class="card surface legal">
+      <h2>BDPay কী করে</h2>
+      <p>BDPay ব্যবসায়ীর নিজের Android ফোনে আসা bKash, Nagad, Rocket ও Upay-এর টাকা-গ্রহণের এসএমএস দেখে গ্রাহকের দেওয়া TrxID-এর সাথে মিলিয়ে অর্ডারের পেমেন্ট যাচাই করে।</p>
+    </section>
+
+    <section class="card surface legal">
+      <h2>কোন তথ্য রাখা হয়</h2>
+      <ul>
+        <li>ব্যবসায়ী: ইমেইল ঠিকানা, ব্যবসার নাম, MFS ওয়ালেট নম্বর, ফোনের নাম ও অ্যাপের অবস্থা (অনুমতি, ব্যাটারি সেটিং)।</li>
+        <li>এসএমএস: শুধু উপরের চার অপারেটরের প্রেরক থেকে আসা টাকা-গ্রহণের এসএমএস। OTP, প্রচার বা ব্যক্তিগত মেসেজ রাখা হয় না।</li>
+        <li>গ্রাহক: অর্ডার নম্বর, পরিমাণ, অপারেটর ও TrxID। গ্রাহকের নাম বা ঠিকানা BDPay পড়ে না।</li>
+        <li>নিরাপত্তা: অতিরিক্ত অনুরোধ ঠেকাতে IP ঠিকানার শুধু একমুখী হ্যাশ রাখা হয়, আসল IP নয়।</li>
+      </ul>
+    </section>
+
+    <section class="card surface legal">
+      <h2>কোথায় রাখা ও কারা প্রক্রিয়া করে</h2>
+      <ul>
+        <li>ডেটাবেস ও সার্ভার: Supabase (অঞ্চল: REPLACE_ME_REGION)।</li>
+        <li>ইমেইল (লগইন কোড ও সতর্কবার্তা): Resend — পাঠানো ইমেইলের কপি তাদের কাছে কিছুদিন থাকে।</li>
+        <li>এই ওয়েবসাইট: Cloudflare।</li>
+        <li>Shopify স্টোর যুক্ত থাকলে: অর্ডারের পেমেন্ট অবস্থা Shopify-তে পাঠানো হয়।</li>
+      </ul>
+    </section>
+
+    <section class="card surface legal">
+      <h2>কতদিন রাখা হয় ও আপনার অধিকার</h2>
+      <p>REPLACE_ME_RETENTION — পেমেন্টের রেকর্ড হিসাব ও বিরোধ নিষ্পত্তির জন্য রাখা হয়। নিজের তথ্য দেখতে বা সংশোধন করতে নিচের ঠিকানায় যোগাযোগ করুন।</p>
+    </section>
+
+    <section class="card surface legal">
+      <h2>যোগাযোগ</h2>
+      <p>REPLACE_ME_SUPPORT_CONTACT</p>
+    </section>
+  </main>
+  <footer class="site-foot">
+    <a href="privacy.html">গোপনীয়তা নীতি</a>
+    <span aria-hidden="true">·</span>
+    <a href="terms.html">শর্তাবলি</a>
+    <span aria-hidden="true">·</span>
+    <a href="download.html">অ্যাপ ডাউনলোড</a>
+  </footer>
+</body>
+</html>

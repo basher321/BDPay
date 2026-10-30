@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- connect-src: add the origin of API_BASE in config.js (spec 13), e.g. http://127.0.0.1:54321 for local testing;
+       spec 15 sets the production origin. Only 'self' here so no server address is committed (plan 13 D145).
+       require-trusted-types-for is decision D25: Chromium browsers refuse HTML-string sinks. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; require-trusted-types-for 'script'">
+  <title>BDPay</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="logo" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path class="logo-shield" d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+    </div>
+    <span class="brand">BDPay</span>
+  </header>
+  <main id="app" aria-live="polite"></main>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <footer class="site-foot">
+    <a href="privacy.html">গোপনীয়তা নীতি</a>
+    <span aria-hidden="true">·</span>
+    <a href="terms.html">শর্তাবলি</a>
+  </footer>
+</body>
+</html>
