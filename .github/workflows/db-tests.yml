@@ -42,8 +42,8 @@ jobs:
           eval "$(supabase status -o env | sed 's/^/export /')"
           export SUPABASE_URL="$API_URL" SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
           set +e
-          deno test --allow-read --allow-env --allow-net=127.0.0.1:54321 supabase/functions/tests/store_contract 2>&1 | tee out.txt
+          NO_COLOR=1 deno test --allow-read --allow-env --allow-net=127.0.0.1:54321 supabase/functions/tests/store_contract 2>&1 | tee out.txt
           status=${PIPESTATUS[0]}
           # Failing test names and database error codes as public annotations (test data only, no secrets).
-          sed 's/\[[0-9;]*m//g' out.txt | grep -E "FAILED|db error|AssertionError|Error:|=> " | head -40             | while IFS= read -r line; do echo "::error::${line}"; done
+          grep -E "FAILED|db error|AssertionError|Error:|=> " out.txt | head -40 | while IFS= read -r line; do echo "::error::${line}"; done
           exit $status
