@@ -72,7 +72,8 @@ export interface SmsRecord {
 }
 
 export interface AuditEntry {
-  merchantId: string;
+  /** null only for system-wide entries such as the expiry job (spec 12). */
+  merchantId: string | null;
   actorType: ActorType;
   actorId: string;
   action: string;
@@ -80,4 +81,67 @@ export interface AuditEntry {
   entityId: string;
   /** Never keys, tokens, signatures or SMS fields. */
   data: Record<string, string | number | boolean | null>;
+}
+
+// ---- Spec 09: payment sessions, claims and matches ----
+
+export type SessionStatus =
+  | "open"
+  | "pending"
+  | "verified"
+  | "mismatch"
+  | "expired"
+  | "rejected";
+/** "superseded" = replaced by a newer claim on the same session (spec 09; plan 09 D31). */
+export type ClaimStatus =
+  | "pending"
+  | "verified"
+  | "mismatch"
+  | "rejected"
+  | "expired"
+  | "superseded";
+export type MatchMethod = "auto" | "manual";
+
+export interface PaymentSession {
+  id: string;
+  merchantId: string;
+  storeId: string;
+  /** SHA-256 of the pay token; the token itself is never stored. */
+  tokenHash: string;
+  orderRef: string;
+  externalOrderId: string | null;
+  amountPoisha: number;
+  status: SessionStatus;
+  submitDeadline: string;
+  attemptsLeft: number;
+  returnUrl: string;
+  activeClaimId: string | null;
+  createdAt: string;
+  verifiedAt: string | null;
+}
+
+export interface PaymentClaim {
+  id: string;
+  merchantId: string;
+  sessionId: string;
+  operator: Operator;
+  /** Trimmed, upper case. */
+  trxId: string;
+  status: ClaimStatus;
+  reason: string | null;
+  candidateSmsId: string | null;
+  matchDeadline: string;
+  createdAt: string;
+}
+
+/** merchantId added for row-level security (plan 09 D35). */
+export interface Match {
+  id: string;
+  merchantId: string;
+  claimId: string;
+  smsId: string;
+  method: MatchMethod;
+  userId: string | null;
+  note: string | null;
+  createdAt: string;
 }

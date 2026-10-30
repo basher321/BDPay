@@ -3,18 +3,34 @@
 
 import { releaseFromEnv } from "./heartbeat.ts";
 import { consoleLogger, type Deps } from "./http.ts";
-import { NoopMatcher } from "./matcher.ts";
-import { MemoryRateLimiter } from "./rate_limit.ts";
+import { StoreMatcher } from "./matcher.ts";
+import { NoopNotifier } from "./notifier.ts";
+import { storeLimiter } from "./rate_limit.ts";
 import { loadRules, rulesVersion } from "./parser.ts";
 import rulesJson from "./parser_rules.json" with { type: "json" };
 import {
   type DeviceUpdate,
   type NewDevice,
+  type NewPaymentSession,
   type ParserRulesRow,
+  type SmsResult,
   type Store,
   StoreError,
 } from "./store.ts";
-import type { AuditEntry, Device, SmsRecord, Wallet } from "./types.ts";
+import type {
+  AuditEntry,
+  Device,
+  Match,
+  MatchMethod,
+  Operator,
+  PaymentClaim,
+  PaymentSession,
+  SmsRecord,
+  Wallet,
+} from "./types.ts";
+
+/** Spec 09: a claim waits at most 24 hours for its SMS. */
+export const MATCH_WINDOW_MS = 24 * 60 * 60 * 1000;
 import { FakeUserVerifier } from "./user_auth.ts";
 
 export class FakeStore implements Store {
@@ -120,6 +136,316 @@ export class FakeStore implements Store {
     this.audit.push({ ...entry, data: { ...entry.data } });
     return Promise.resolve();
   }
+  // ---- Spec 09 ----
+  // Every multi-record write checks everything and writes everything in one synchronous block (no await inside),
+  // so racing callers cannot both succeed - the FakeStore's stand-in for one database transaction (plan 09 §3).
+
+  readonly sessions = new Map<string, PaymentSession>();
+  readonly claims = new Map<string, PaymentClaim>();
+  readonly matches: Match[] = [];
+  readonly merchantNames = new Map<string, string>();
+  private readonly rateCounts = new Map<string, number>();
+  /** Test-only: read methods of the matching flow await this, so a test can hold two callers after their reads. */
+  gate: Promise<void> | null = null;
+
+  private iso(ms = this.now()): string {
+    return new Date(ms).toISOString();
+  }
+
+  private async pass(): Promise<void> {
+    if (this.gate !== null) await this.gate;
+  }
+
+  setMerchantName(merchantId: string, name: string): void {
+    this.merchantNames.set(merchantId, name);
+  }
+
+  createPaymentSession(fields: NewPaymentSession) {
+    const session: PaymentSession = {
+      ...fields,
+      id: crypto.randomUUID(),
+      status: "open",
+      attemptsLeft: 5,
+      activeClaimId: null,
+      createdAt: this.iso(),
+      verifiedAt: null,
+    };
+    this.sessions.set(session.id, session);
+    return Promise.resolve({ ...session });
+  }
+
+  getSessionByTokenHash(tokenHash: string) {
+    for (const s of this.sessions.values()) {
+      if (s.tokenHash === tokenHash) return Promise.resolve({ ...s });
+    }
+    return Promise.resolve(null);
+  }
+
+  getSession(id: string) {
+    const s = this.sessions.get(id);
+    return Promise.resolve(s === undefined ? null : { ...s });
+  }
+
+  getClaim(id: string) {
+    const c = this.claims.get(id);
+    return Promise.resolve(c === undefined ? null : { ...c });
+  }
+
+  getSms(id: string) {
+    const s = this.sms.find((x) => x.id === id);
+    return Promise.resolve(s === undefined ? null : { ...s });
+  }
+
+  getMerchantName(merchantId: string) {
+    return Promise.resolve(this.merchantNames.get(merchantId) ?? "");
+  }
+
+  hasDeviceSeenSince(merchantId: string, sinceIso: string) {
+    const since = Date.parse(sinceIso);
+    for (const d of this.devices.values()) {
+      if (
+        d.merchantId === merchantId && d.status === "active" &&
+        Date.parse(d.lastSeenAt) >= since
+      ) return Promise.resolve(true);
+    }
+    return Promise.resolve(false);
+  }
+
+  private liveClaim(merchantId: string, operator: Operator, trxId: string) {
+    for (const c of this.claims.values()) {
+      if (
+        c.merchantId === merchantId && c.operator === operator &&
+        c.trxId === trxId &&
+        (c.status === "pending" || c.status === "verified" ||
+          c.status === "mismatch")
+      ) return c;
+    }
+    return null;
+  }
+
+  findLiveClaimByTrx(
+    merchantId: string,
+    operator: Operator,
+    trxId: string,
+  ) {
+    const c = this.liveClaim(merchantId, operator, trxId);
+    return Promise.resolve(c === null ? null : { ...c });
+  }
+
+  spendAttempt(sessionId: string) {
+    const s = this.sessions.get(sessionId);
+    if (s === undefined) return Promise.reject(new StoreError("notFound"));
+    s.attemptsLeft = Math.max(0, s.attemptsLeft - 1);
+    return Promise.resolve(s.attemptsLeft);
+  }
+
+  submitClaim(input: { sessionId: string; operator: Operator; trxId: string }) {
+    // One block: check, build, write.
+    const now = this.now();
+    const s = this.sessions.get(input.sessionId);
+    const open = s !== undefined &&
+      (s.status === "pending" ||
+        (s.status === "open" && now <= Date.parse(s.submitDeadline)));
+    if (s === undefined || !open) {
+      return Promise.resolve({ conflict: "closed" as const });
+    }
+    if (s.attemptsLeft <= 0) {
+      return Promise.resolve({ conflict: "noAttemptsLeft" as const });
+    }
+    if (this.liveClaim(s.merchantId, input.operator, input.trxId) !== null) {
+      return Promise.resolve({ conflict: "alreadyUsed" as const });
+    }
+    const old = s.activeClaimId === null
+      ? undefined
+      : this.claims.get(s.activeClaimId);
+    const claim: PaymentClaim = {
+      id: crypto.randomUUID(),
+      merchantId: s.merchantId,
+      sessionId: s.id,
+      operator: input.operator,
+      trxId: input.trxId,
+      status: "pending",
+      reason: null,
+      candidateSmsId: null,
+      matchDeadline: this.iso(now + MATCH_WINDOW_MS),
+      createdAt: this.iso(now),
+    };
+    if (old !== undefined && old.status === "pending") {
+      old.status = "superseded";
+    }
+    this.claims.set(claim.id, claim);
+    s.attemptsLeft -= 1;
+    s.status = "pending";
+    s.activeClaimId = claim.id;
+    return Promise.resolve({ claim: { ...claim } });
+  }
+
+  async findUnmatchedSms(
+    merchantId: string,
+    operator: Operator,
+    trxId: string,
+  ) {
+    await this.pass();
+    const s = this.sms.find((x) =>
+      x.merchantId === merchantId && x.operator === operator &&
+      x.trxId === trxId && x.status === "unmatched"
+    );
+    return s === undefined ? null : { ...s };
+  }
+
+  async findPendingClaimByTrx(
+    merchantId: string,
+    operator: Operator,
+    trxId: string,
+  ) {
+    await this.pass();
+    for (const c of this.claims.values()) {
+      if (
+        c.merchantId === merchantId && c.operator === operator &&
+        c.trxId === trxId && c.status === "pending"
+      ) return { ...c };
+    }
+    return null;
+  }
+
+  recordVerified(input: {
+    claimId: string;
+    smsId: string;
+    method: MatchMethod;
+    userId: string | null;
+    note: string | null;
+  }) {
+    const c = this.claims.get(input.claimId);
+    const sms = this.sms.find((x) => x.id === input.smsId);
+    const s = c === undefined ? undefined : this.sessions.get(c.sessionId);
+    const ok = c !== undefined && sms !== undefined && s !== undefined &&
+      s.activeClaimId === c.id &&
+      (input.method === "auto"
+        ? c.status === "pending" && s.status === "pending"
+        : c.status === "mismatch" && s.status === "mismatch" &&
+          c.candidateSmsId === sms.id) &&
+      sms.status === "unmatched" && sms.merchantId === c.merchantId &&
+      sms.operator === c.operator && sms.trxId === c.trxId &&
+      !this.matches.some((m) => m.claimId === c.id || m.smsId === sms.id);
+    if (!ok) return Promise.resolve("conflict" as const);
+    const now = this.iso();
+    this.matches.push({
+      id: crypto.randomUUID(),
+      merchantId: c.merchantId,
+      claimId: c.id,
+      smsId: sms.id,
+      method: input.method,
+      userId: input.userId,
+      note: input.note,
+      createdAt: now,
+    });
+    c.status = "verified";
+    c.candidateSmsId = sms.id;
+    s.status = "verified";
+    s.verifiedAt = now;
+    sms.status = "matched";
+    return Promise.resolve("ok" as const);
+  }
+
+  recordMismatch(input: { claimId: string; smsId: string; reason: string }) {
+    const c = this.claims.get(input.claimId);
+    const sms = this.sms.find((x) => x.id === input.smsId);
+    const s = c === undefined ? undefined : this.sessions.get(c.sessionId);
+    const ok = c !== undefined && sms !== undefined && s !== undefined &&
+      s.activeClaimId === c.id && c.status === "pending" &&
+      s.status === "pending" && sms.status === "unmatched" &&
+      sms.merchantId === c.merchantId;
+    if (!ok) return Promise.resolve("conflict" as const);
+    c.status = "mismatch";
+    c.reason = input.reason;
+    c.candidateSmsId = sms.id;
+    s.status = "mismatch";
+    return Promise.resolve("ok" as const);
+  }
+
+  recordRejected(
+    input: { claimId: string; userId: string; note: string | null },
+  ) {
+    const c = this.claims.get(input.claimId);
+    const s = c === undefined ? undefined : this.sessions.get(c.sessionId);
+    const ok = c !== undefined && s !== undefined && s.activeClaimId === c.id &&
+      c.status === "mismatch" && s.status === "mismatch";
+    if (!ok) return Promise.resolve("conflict" as const);
+    c.status = "rejected";
+    s.status = "rejected";
+    return Promise.resolve("ok" as const);
+  }
+
+  findMismatchClaimBySms(smsId: string) {
+    for (const c of this.claims.values()) {
+      if (c.candidateSmsId === smsId && c.status === "mismatch") {
+        return Promise.resolve({ ...c });
+      }
+    }
+    return Promise.resolve(null);
+  }
+
+  getSmsResults(merchantId: string, smsIds: string[]) {
+    const out: SmsResult[] = [];
+    for (const id of smsIds) {
+      const sms = this.sms.find((x) =>
+        x.id === id && x.merchantId === merchantId
+      );
+      if (sms === undefined) continue;
+      const match = this.matches.find((m) => m.smsId === sms.id) ?? null;
+      let claim: PaymentClaim | undefined = match === null
+        ? undefined
+        : this.claims.get(match.claimId);
+      if (claim === undefined) {
+        // The newest claim that named this SMS as its candidate (mismatch, or rejected after it).
+        for (const c of this.claims.values()) {
+          if (c.candidateSmsId === sms.id) claim = c;
+        }
+      }
+      const session = claim === undefined
+        ? undefined
+        : this.sessions.get(claim.sessionId);
+      out.push({
+        sms: { ...sms },
+        claim: claim === undefined ? null : { ...claim },
+        session: session === undefined ? null : { ...session },
+        match: match === null ? null : { ...match },
+      });
+    }
+    return Promise.resolve(out);
+  }
+
+  expireDue(nowIso: string) {
+    const now = Date.parse(nowIso);
+    let sessions = 0;
+    let claims = 0;
+    for (const s of this.sessions.values()) {
+      if (s.status === "open" && now > Date.parse(s.submitDeadline)) {
+        s.status = "expired";
+        sessions++;
+      } else if (s.status === "pending" && s.activeClaimId !== null) {
+        const c = this.claims.get(s.activeClaimId);
+        if (
+          c !== undefined && c.status === "pending" &&
+          now > Date.parse(c.matchDeadline)
+        ) {
+          c.status = "expired";
+          s.status = "expired";
+          claims++;
+          sessions++;
+        }
+      }
+    }
+    return Promise.resolve({ sessions, claims });
+  }
+
+  hitRateLimit(key: string, limit: number, windowSeconds: number) {
+    const window = Math.floor(this.now() / (windowSeconds * 1000));
+    const k = `${key}|${windowSeconds}|${window}`;
+    const n = (this.rateCounts.get(k) ?? 0) + 1;
+    this.rateCounts.set(k, n);
+    return Promise.resolve(n <= limit);
+  }
 }
 
 /** Fixed demo data for BDPAY_FAKE_STORE=1 runs and the smoke script. Not secrets: they only work with FakeStore. */
@@ -145,13 +471,16 @@ export function demoStore(now: () => number = Date.now): FakeStore {
 }
 
 export function demoDeps(now: () => number = Date.now): Deps {
+  const store = demoStore(now);
+  const notifier = new NoopNotifier();
   return {
-    store: demoStore(now),
+    store,
     users: new FakeUserVerifier(new Map([[DEMO.userToken, DEMO.userId]])),
-    matcher: new NoopMatcher(),
+    matcher: new StoreMatcher(store, notifier, consoleLogger),
     now,
     log: consoleLogger,
-    limiter: new MemoryRateLimiter(now),
+    limiter: storeLimiter(store),
+    notifier,
   };
 }
 
@@ -162,6 +491,14 @@ export function depsFromEnv(
   get: (name: string) => string | undefined,
 ): Deps | null {
   if (get("BDPAY_FAKE_STORE") !== "1") return null;
-  local ??= { ...demoDeps(), release: releaseFromEnv(get) };
+  local ??= {
+    ...demoDeps(),
+    release: releaseFromEnv(get),
+    config: {
+      payPageOrigin: get("PAY_PAGE_ORIGIN"),
+      cronSecret: get("CRON_SECRET"),
+      rateLimitPepper: get("RATE_LIMIT_PEPPER"),
+    },
+  };
   return local;
 }

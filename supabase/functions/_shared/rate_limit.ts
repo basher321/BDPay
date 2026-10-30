@@ -21,3 +21,53 @@ export class MemoryRateLimiter implements RateLimiter {
     return Promise.resolve(n <= limit);
   }
 }
+
+/** Spec 09: the Store's atomic counter (hit_rate_limit in the database) as a RateLimiter. */
+export function storeLimiter(store: {
+  hitRateLimit(
+    key: string,
+    limit: number,
+    windowSeconds: number,
+  ): Promise<boolean>;
+}): RateLimiter {
+  return {
+    hit: (key, limit, windowSeconds) =>
+      store.hitRateLimit(key, limit, windowSeconds),
+  };
+}
+
+/** When RATE_LIMIT_PEPPER is not set: a random pepper per worker (buckets then hold per instance only). */
+const fallbackPepper = crypto.getRandomValues(new Uint8Array(32));
+
+/**
+ * A rate-limit key for a client IP: HMAC-SHA-256(pepper, ip) in hex - never the raw IP and never a plain hash,
+ * which could be reversed by trying all addresses (plan 09 D29).
+ */
+export async function ipKey(
+  prefix: string,
+  ip: string,
+  pepper?: string,
+): Promise<string> {
+  const keyBytes = pepper ? new TextEncoder().encode(pepper) : fallbackPepper;
+  const key = await crypto.subtle.importKey(
+    "raw",
+    keyBytes,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    [
+      "sign",
+    ],
+  );
+  const mac = new Uint8Array(
+    await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(ip)),
+  );
+  return `${prefix}:${
+    Array.from(mac, (b) => b.toString(16).padStart(2, "0")).join("")
+  }`;
+}
+
+/** The first address in x-forwarded-for (set by the Supabase edge), else "unknown". */
+export function clientIp(req: Request): string {
+  const first = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  return first !== undefined && first !== "" ? first : "unknown";
+}

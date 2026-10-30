@@ -2,6 +2,7 @@
 // Error messages are fixed per code and never built from the request, so no input can be echoed or logged.
 
 import type { Matcher } from "./matcher.ts";
+import type { OrderNotifier } from "./notifier.ts";
 import type { RateLimiter } from "./rate_limit.ts";
 import type { Store } from "./store.ts";
 import type { UserVerifier } from "./user_auth.ts";
@@ -23,6 +24,8 @@ export type ErrorCode =
   | "badPublicKey"
   | "storeNotReady"
   | "rateLimited"
+  | "notFound"
+  | "badCronSecret"
   | "internalError";
 
 const MESSAGES: Record<ErrorCode, string> = {
@@ -40,6 +43,8 @@ const MESSAGES: Record<ErrorCode, string> = {
   badPublicKey: "The public key is not a P-256 key.",
   storeNotReady: "The data store is not ready.",
   rateLimited: "Too many requests. Try again later.",
+  notFound: "Not found.",
+  badCronSecret: "The cron secret is missing or wrong.",
   internalError: "Something went wrong on the server.",
 };
 
@@ -61,6 +66,13 @@ export interface AppRelease {
   appDownloadUrl: string;
 }
 
+/** Spec 09: environment settings, read once in depsFromEnv. Empty or unset values fail closed. */
+export interface AppConfig {
+  payPageOrigin?: string;
+  cronSecret?: string;
+  rateLimitPepper?: string;
+}
+
 /** What every core handler gets. now() is milliseconds since epoch. */
 export interface Deps {
   store: Store;
@@ -72,6 +84,10 @@ export interface Deps {
   limiter?: RateLimiter;
   /** Spec 15: the newest app for the update notice (device-heartbeat); absent when not configured. */
   release?: AppRelease;
+  /** Spec 09: told after a payment is verified (spec 10 plugs in Shopify). Absent = do nothing. */
+  notifier?: OrderNotifier;
+  /** Spec 09 settings from the environment (read only in depsFromEnv). */
+  config?: AppConfig;
 }
 
 export function json(status: number, body: unknown): Response {
