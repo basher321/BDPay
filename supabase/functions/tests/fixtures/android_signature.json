@@ -1,0 +1,8 @@
+{
+  "note": "Written by AndroidSignatureFixtureTest (spec 13a). Test key, public data only.",
+  "publicKeySpki": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEeg+6IVkrNYo77QsUy359LXiWmkRgQkNuo7EIEFsokdpGiLXEB+/kglJ/xvklOpxhAtGPOW85DQo6TrJnuGuB8g==",
+  "functionName": "sms-ingest",
+  "timestamp": "1761800000000",
+  "body": "{\"items\":[{\"localId\":\"local-1\",\"sender\":\"16216\",\"body\":\"Tk1,500.00 received from 017123456789 for A/C: 019876543211. Fee Tk0.00, Balance Tk5,600.00. TxnId: 24010200123\",\"receivedAt\":\"2025-10-30T04:52:20Z\",\"simSlot\":\"sim1\",\"dedupeHash\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
+  "signature": "MEYCIQD1Xovnle4VDdBzU9a4Pk1U9xO1/Swc2sZ3HB1IHiEujAIhAPpPunfssP+jDB/JgiurJoggxhY7BHoSYzbt6cxtoy2D"
+}

@@ -1,0 +1,44 @@
+# Applies every migration to a throwaway local Supabase on GitHub's runner (Docker is there, not on the dev PC),
+# runs the pgTAP tests and the Store contract tests against the real database. Never touches the live project.
+name: db-tests
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.121.0
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Start a throwaway local Supabase (applies all migrations from empty)
+        run: supabase start -x studio,imgproxy,inbucket,edge-runtime,logflare,vector,supavisor
+
+      - name: Lint the database
+        run: supabase db lint --level error
+
+      - name: pgTAP tests
+        run: supabase test db
+
+      - name: Store contract tests against the real database
+        if: hashFiles('supabase/functions/tests/store_contract/pg_store_contract_test.ts') != ''
+        env:
+          BDPAY_TEST_DB: "1"
+        run: |
+          eval "$(supabase status -o env | sed 's/^/export /')"
+          export SUPABASE_URL="$API_URL" SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
+          deno test --allow-read --allow-env --allow-net=127.0.0.1:54321 supabase/functions/tests/store_contract
