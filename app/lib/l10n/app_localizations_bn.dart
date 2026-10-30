@@ -10,16 +10,10 @@ class AppLocalizationsBn extends AppLocalizations {
   AppLocalizationsBn([String locale = 'bn']) : super(locale);
 
   @override
-  String get appTitle => 'BDPay SMS Verifier';
+  String get appTitle => 'BDPay';
 
   @override
   String get headerBrand => 'BDPay';
-
-  @override
-  String get headerProduct => 'SMS Verifier';
-
-  @override
-  String get headerSubtitle => 'পেমেন্ট যাচাই অ্যাপ';
 
   @override
   String get online => 'অনলাইন';

@@ -29,21 +29,8 @@ class AppHeader extends ConsumerWidget {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text.rich(
-                  TextSpan(children: [
-                    TextSpan(text: l.headerBrand, style: AppText.logoBrand),
-                    const TextSpan(text: ' '),
-                    TextSpan(text: l.headerProduct, style: AppText.logoProduct),
-                  ]),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(l.headerSubtitle, style: AppText.headerSub),
-              ],
-            ),
+            // The app is called just "BDPay" (owner decision, 2026-10-30).
+            child: Text(l.headerBrand, style: AppText.logoBrand, maxLines: 1, overflow: TextOverflow.ellipsis),
           ),
           Container(
             key: const Key('onlinePill'),

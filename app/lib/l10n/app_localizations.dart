@@ -97,7 +97,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In bn, this message translates to:
-  /// **'BDPay SMS Verifier'**
+  /// **'BDPay'**
   String get appTitle;
 
   /// No description provided for @headerBrand.
@@ -105,18 +105,6 @@ abstract class AppLocalizations {
   /// In bn, this message translates to:
   /// **'BDPay'**
   String get headerBrand;
-
-  /// No description provided for @headerProduct.
-  ///
-  /// In bn, this message translates to:
-  /// **'SMS Verifier'**
-  String get headerProduct;
-
-  /// No description provided for @headerSubtitle.
-  ///
-  /// In bn, this message translates to:
-  /// **'পেমেন্ট যাচাই অ্যাপ'**
-  String get headerSubtitle;
 
   /// No description provided for @online.
   ///

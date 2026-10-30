@@ -1,9 +1,7 @@
 {
   "@@locale": "bn",
-  "appTitle": "BDPay SMS Verifier",
+  "appTitle": "BDPay",
   "headerBrand": "BDPay",
-  "headerProduct": "SMS Verifier",
-  "headerSubtitle": "পেমেন্ট যাচাই অ্যাপ",
   "online": "অনলাইন",
   "offline": "অফলাইন",
   "tabHome": "হোম",
