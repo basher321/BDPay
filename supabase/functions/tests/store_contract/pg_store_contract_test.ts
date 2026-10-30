@@ -13,7 +13,7 @@ function pgMaker(): Promise<StoreMaker> {
   const admin = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const store = PgStore.fromEnv(url, key);
+  const store = PgStore.fromEnv(url, key, (m) => console.error(m));
   const must = <T>(r: { data: T | null; error: unknown }): T => {
     if (r.error || r.data === null) throw new Error("test setup failed");
     return r.data;

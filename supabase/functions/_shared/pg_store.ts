@@ -136,20 +136,35 @@ const deviceRow = (f: Partial<NewDevice> & DeviceUpdate): Row => {
 const LIVE = ["pending", "verified", "mismatch"];
 
 export class PgStore implements Store {
-  constructor(private readonly db: SupabaseClient) {}
+  /** [debug] is for local / CI test runs only (never set in production): it gets the database error code. */
+  constructor(
+    private readonly db: SupabaseClient,
+    private readonly debug?: (msg: string) => void,
+  ) {}
 
-  static fromEnv(url: string, serviceRoleKey: string): PgStore {
+  static fromEnv(
+    url: string,
+    serviceRoleKey: string,
+    debug?: (msg: string) => void,
+  ): PgStore {
     return new PgStore(
       createClient(url, serviceRoleKey, {
         auth: { persistSession: false, autoRefreshToken: false },
         global: { headers: { "X-Client-Info": "bdpay-edge" } },
       }),
+      debug,
     );
   }
 
   /** Unwraps a supabase-js result; any error -> StoreError("db") without details. */
   private ok<T>(res: { data: T | null; error: unknown }): T | null {
-    if (res.error) throw new StoreError("db");
+    if (res.error) {
+      if (this.debug) {
+        const e = res.error as { code?: string; message?: string };
+        this.debug(`db error ${e.code ?? "?"}: ${e.message ?? ""}`);
+      }
+      throw new StoreError("db");
+    }
     return res.data;
   }
 
