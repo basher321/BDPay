@@ -14,6 +14,7 @@ function pgMaker(): Promise<StoreMaker> {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   const store = PgStore.fromEnv(url, key, (m) => console.error(m));
+  const storeIds = new Map<string, string>();
   const must = <T>(r: { data: T | null; error: unknown }): T => {
     if (r.error || r.data === null) throw new Error("test setup failed");
     return r.data;
@@ -80,12 +81,16 @@ function pgMaker(): Promise<StoreMaker> {
       );
     },
     async newStoreId(merchantId) {
+      // One active store per merchant (stores_one_active): reuse it for later sessions.
+      const known = storeIds.get(merchantId);
+      if (known !== undefined) return known;
       const s = must(
         await admin.from("stores").insert({
           merchant_id: merchantId,
           shop_domain: `t-${randomHex(6)}.myshopify.com`,
         }).select("id").single(),
       ) as { id: string };
+      storeIds.set(merchantId, s.id);
       return s.id;
     },
   });
