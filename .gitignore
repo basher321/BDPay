@@ -36,3 +36,6 @@ demo/
 .claude/
 *.docx
 ~$*
+
+# Live APK builds - never commit.
+live/

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="bn"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BDPay SMS Verifier – UI</title>
+<style>
+:root{color-scheme:dark;--em:#00D09C;--bg:#080D1A;--sf:#10192D;--cd:#17233D;--bd:#233558;--t1:#F8FAFC;--t2:#94A3B8;--t3:#64748B;--ok:#10B981;--wa:#F59E0B;--er:#EF4444;--in:#38BDF8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0;font-family:Roboto,system-ui,"Noto Sans Bengali",sans-serif}
+html,body{height:100%;background:#03060d;color:var(--t1)}
+#app{max-width:420px;height:100%;margin:0 auto;background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px}
+.logo{width:32px;height:32px;border-radius:8px;background:var(--em);display:grid;place-items:center;margin-right:10px}
+.row{display:flex;align-items:center}.sb{justify-content:space-between}.g{gap:8px}
+.pill{border:1px solid var(--bd);background:var(--sf);border-radius:16px;padding:4px 8px;font-size:10px;font-weight:700}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px}
+main{flex:1;overflow-y:auto;padding:4px 16px 20px}
+.col{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:14px}
+.card.s{background:var(--sf)}.card.big{border-radius:18px;padding:16px}
+h3{font-size:15px;font-weight:700}.sm{font-size:11px;color:var(--t2)}.mu{color:var(--t3)}
+.em{color:var(--em)}
+.btn{border:0;border-radius:12px;padding:10px 12px;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;flex:1;color:#080D1A;background:var(--em)}
+.btn.o{background:var(--cd);color:var(--t1);border:1px solid var(--bd)}
+.btn.xs{flex:none;border-radius:8px;height:30px;font-size:11px;padding:0 10px}
+.btn:disabled{background:var(--cd);color:var(--t3)}
+nav{display:flex;background:var(--sf);border-top:.5px solid var(--bd);padding:8px 0}
+nav button{flex:1;background:none;border:0;color:var(--t3);font-size:10px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;position:relative}
+nav .ind{width:56px;height:30px;border-radius:15px;display:grid;place-items:center}
+nav button.on{color:var(--em);font-weight:700}nav button.on .ind{background:var(--em)}nav button.on svg{fill:#080D1A}
+nav svg{width:22px;height:22px;fill:currentColor}
+.bdg{position:absolute;top:-3px;right:calc(50% - 26px);background:var(--em);color:#080D1A;font-size:10px;font-weight:700;border-radius:8px;padding:0 5px}
+.sw{width:50px;height:30px;border-radius:15px;background:#1E293B;border:2px solid #94A3B8;position:relative;cursor:pointer;flex:none}
+.sw::after{content:"";position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;background:#94A3B8;transition:.2s}
+.sw.on{background:var(--c,var(--em));border-color:var(--c,var(--em))}.sw.on::after{left:24px;background:#080D1A;width:20px;height:20px;top:3px}
+.chip{display:inline-block;border-radius:20px;padding:3px 8px;font-size:11px;font-weight:600;border:1px solid;white-space:nowrap}
+.pb{display:inline-block;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;border:1px solid}
+.fl{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}.fl>*{flex:none}
+.fc{border:1px solid var(--bd);background:var(--sf);color:var(--t2);border-radius:8px;padding:6px 12px;font-size:11px;cursor:pointer}
+.fp{background:var(--sf);color:var(--t2);border-radius:20px;padding:5px 10px;font-size:11px;cursor:pointer}
+.on2{background:rgba(0,208,156,.2);color:var(--em);font-weight:700}
+input,textarea,select{width:100%;background:var(--sf);border:1px solid var(--bd);border-radius:12px;color:var(--t1);padding:12px;font-size:13px;outline:none}
+.card input,.card select{background:var(--cd);border-radius:4px}
+input:focus,textarea:focus{border-color:var(--em)}
+label{font-size:12px;color:var(--t2);display:block;margin-bottom:4px}
+.kv{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px}
+hr{border:0;border-top:1px solid var(--bd);margin:10px 0}
+.mc{flex:1;border-radius:14px;padding:12px;background:var(--cd);border:1px solid var(--bd)}
+.ov{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;padding:16px;z-index:9}
+.dl{background:var(--sf);border-radius:20px;padding:20px;width:100%;max-height:92%;overflow-y:auto}
+.raw{background:#090E17;border:1px solid var(--bd);border-radius:8px;padding:10px;font:11px/16px monospace;color:var(--t2)}
+#toast{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:#E2E8F0;color:#0F172A;padding:8px 14px;border-radius:20px;font-size:12px;display:none;z-index:10}
+.empty{text-align:center;padding:30px 10px}
+</style></head><body>
+<div id="app">
+<header>
+ <div class="row"><div class="logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="#080D1A"><path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div>
+ <div><div><b style="font-size:17px;font-weight:900">BDPay</b> <span class="em" style="font-size:15px;font-weight:500">SMS Verifier</span></div><div class="mu" style="font-size:10px">MFS Gateway Receiver</div></div></div>
+ <div class="pill row"><span class="dot" style="background:var(--ok);margin:0 6px 0 0"></span><span style="color:var(--ok)">অনলাইন</span></div>
+</header>
+<main id="main"></main>
+<nav id="nav"></nav>
+<div id="toast"></div><div id="modal"></div>
+</div>
+<script>
+const P={bKash:'#E2136E',Nagad:'#F7941D',Rocket:'#8C3494',Upay:'#004884'};
+const ST={ok:['গেটওয়ে কনফার্মড (সফল)','var(--ok)'],pe:['কনফার্মেশন অপেক্ষমান','var(--wa)'],rej:['গেটওয়ে বাতিল','var(--er)'],off:['গেটওয়ে অফলাইন','var(--er)']};
+const SY={SYNCED:['Synced','var(--ok)'],PENDING:['Queue','var(--wa)'],FAILED:['Failed','var(--er)']};
+const TT={pay:'পেমেন্ট প্রাপ্তি',rcv:'টাকা প্রাপ্তি'};
+let tx=[
+{id:1,p:'bKash',trx:'9K48X7Z2',amt:1250,from:'01712345678',t:'pay',v:'ok',s:'SYNCED',time:'06:25 PM',ref:'ORD-101',bal:15340.5,code:200,msg:'Verified OK',raw:'You have received payment Tk 1,250.00 from 01712345678. Ref: ORD-101. Fee Tk 0.00. Balance Tk 15,340.50. TrxID 9K48X7Z2 at 02/10/2026 18:25'},
+{id:2,p:'Nagad',trx:'71B99AA2',amt:2500,from:'01812345678',t:'rcv',v:'ok',s:'SYNCED',time:'02:15 PM',bal:15000,code:200,msg:'Verified OK',raw:'Money Received Amount: Tk 2,500.00 Sender: 01812345678 TxnID: 71B99AA2 Balance: Tk 15,000.00 Time: 02/10/2026 14:15'},
+{id:3,p:'Rocket',trx:'24010200123',amt:1500,from:'017123456789',t:'rcv',v:'pe',s:'PENDING',time:'06:00 PM',retry:2,msg:'Network error',raw:'Tk1,500.00 received from 017123456789 for A/C: 019876543211. Fee Tk0.00, Balance Tk5,600.00. TxnId: 24010200123'},
+{id:4,p:'Upay',trx:'4UP82910',amt:800,from:'01711223344',t:'rcv',v:'pe',s:'PENDING',time:'11:40 AM',raw:'You have received Tk 800.00 from 01711223344. Txn ID: 4UP82910. Current balance Tk 3,400.00.'},
+{id:5,p:'bKash',trx:'8H22K9P1',amt:430,from:'01911002200',t:'pay',v:'rej',s:'FAILED',time:'10:05 AM',code:409,msg:'Rejected: amount mismatch',raw:'You have received payment Tk 430.00 from 01911002200. TrxID 8H22K9P1'}];
+let tab=0,mon=true,fq='',fp=null,fs=null,tpl=0,simRes=null,simMsg=null,setP={bKash:1,Nagad:1,Rocket:1,Upay:1},auto=true;
+const TABS=[['ড্যাশবোর্ড','M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z'],['লেনদেন','M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z'],['সিঙ্ক কিউ','M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z'],['পরীক্ষক','M13 11.33 18 18H6l5-6.67V6h2m2.96-4H8.04v2H9v5.33L3.2 17.2C2.7 17.87 3.17 19 4 19h16c.83 0 1.3-1.13.8-1.8L15 9.33V4h.96z'],['সেটিংস','M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58-1.92-3.32-2.39.96a7.03 7.03 0 0 0-1.62-.94L14.8 3h-3.84l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96-1.92 3.32 2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58 1.92 3.32 2.39-.96c.5.37 1.03.7 1.62.94l.36 2.54h3.84l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96 1.92-3.32-2.03-1.58zM12.9 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z']];
+const $=s=>document.querySelector(s),M=n=>'৳ '+n.toLocaleString('en-US',{minimumFractionDigits:2});
+const pb=p=>`<span class="pb" style="color:${P[p]||'#64748B'};background:${P[p]||'#64748B'}26;border-color:${P[p]||'#64748B'}80">${p||'Other MFS'}</span>`;
+const vb=v=>{const[l,c]=ST[v];return`<span class="chip" style="color:${c};background:color-mix(in srgb,${c} 15%,transparent);border-color:color-mix(in srgb,${c} 40%,transparent)"><i class="dot" style="background:${c};width:6px;height:6px;margin-right:5px"></i>${l}</span>`};
+const sc=s=>{const[l,c]=SY[s];return`<span style="font-size:10px;font-weight:500;color:${c};background:color-mix(in srgb,${c} 12%,transparent);padding:2px 6px;border-radius:4px">${l}</span>`};
+const sw=(on,fn,c)=>`<div class="sw ${on?'on':''}" ${c?`style="--c:${c}"`:''} onclick="${fn}"></div>`;
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',1800)}
+const card=t=>`<div class="card" style="cursor:pointer" onclick="detail(${t.id})"><div class="row sb"><div style="flex:1"><div class="row g">${pb(t.p)}<b style="font-size:13px">Trx: ${t.trx}</b></div>
+<div class="sm" style="margin:6px 0 4px">প্রেরক: ${t.from} • ${TT[t.t]}</div><div class="row g">${vb(t.v)}<span class="mu" style="font-size:10px">${t.time}</span></div></div>
+<div style="text-align:right"><div class="em" style="font-size:16px;font-weight:700;margin-bottom:4px">${M(t.amt)}</div>${sc(t.s)}</div></div></div>`;
+const pend=()=>tx.filter(t=>t.s==='PENDING'||t.s==='FAILED');
+function nav(){$('#nav').innerHTML=TABS.map((t,i)=>`<button class="${i==tab?'on':''}" onclick="tab=${i};render()"><div class="ind"><svg viewBox="0 0 24 24"><path d="${t[1]}"/></svg></div>${i==2&&pend().length?`<span class="bdg">${pend().length}</span>`:''}${t[0]}</button>`).join('')}
+function dash(){const ok=tx.filter(t=>t.v==='ok'),vol=ok.reduce((a,t)=>a+t.amt,0);
+return`<div class="col"><div class="card s big"><div class="row sb"><div class="row g"><div style="width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:${mon?'rgba(0,208,156,.15)':'rgba(239,68,68,.15)'};color:${mon?'var(--em)':'var(--er)'}">${mon?'◉':'⊘'}</div><div><b style="font-size:15px">POS Terminal 01</b><div class="sm">আইডি: BDP-A1 • মার্চেন্ট</div></div></div>${sw(mon,'mon=!mon;render()')}</div>
+<div class="row sb" style="margin-top:14px;background:var(--cd);border-radius:10px;padding:8px 12px"><div class="row" style="font-size:11px;font-weight:500"><i class="dot" style="background:var(--ok);width:8px;height:8px;margin-right:8px"></i>গেটওয়ে অনলাইন (84ms)</div><span class="em" style="cursor:pointer" onclick="toast('Ping সফল')">⟳</span></div></div>
+<div class="card s big" style="background:linear-gradient(90deg,rgba(0,208,156,.08),var(--sf) 90%);padding:18px"><div class="row sb"><span class="sm" style="font-size:13px;font-weight:500">আজকের মোট যাচাইকৃত ভলিউম</span><span class="chip em" style="background:rgba(0,208,156,.15);border:0;font-size:10px;border-radius:6px">BDT</span></div><div class="em" style="font-size:32px;font-weight:700;margin:6px 0 4px">${M(vol)}</div><div class="mu" style="font-size:11px">শুধুমাত্র গেটওয়ে দ্বারা নিশ্চিতকৃত সফল লেনদেন অন্তর্ভুক্ত</div></div>
+<div class="row g">${[['যাচাইকৃত',ok.length,'সফল কনফার্মেশন','var(--ok)'],['অপেক্ষমান',pend().length,'গেটওয়ে কিউ','var(--wa)'],['মোট স্ক্যান',tx.length,'প্রাপ্ত এসএমএস','var(--in)']].map(m=>`<div class="mc"><div class="row sb"><span class="sm" style="font-weight:500">${m[0]}</span><span style="color:${m[3]}">●</span></div><div style="font-size:20px;font-weight:700;margin:6px 0 2px">${m[1]}</div><div class="mu" style="font-size:10px">${m[2]}</div></div>`).join('')}</div>
+<div class="row g"><button class="btn o" onclick="syncAll()">⟳ কিউ সিঙ্ক (${pend().length})</button><button class="btn" onclick="tab=3;render()">🔔 এসএমএস পরীক্ষা</button></div>
+<div><h3 style="margin-bottom:8px">এমএফএস সার্ভিস মনিটরিং স্ট্যাটাস</h3><div class="row g">${Object.keys(P).map(p=>`<div style="flex:1;text-align:center;border-radius:10px;padding:8px;background:var(--cd);border:1px solid ${setP[p]?P[p]+'66':'var(--bd)'};opacity:${setP[p]?1:.5}"><div style="font-size:11px;font-weight:700;color:${setP[p]?P[p]:'var(--t3)'}">${p}</div><div class="sm" style="font-size:10px">${setP[p]?tx.filter(t=>t.p===p).length+' টি':'বন্ধ'}</div></div>`).join('')}</div></div>
+<div class="row sb"><h3>সর্বশেষ এসএমএস লেনদেন</h3><span class="em" style="font-size:12px;font-weight:600;cursor:pointer" onclick="tab=1;render()">সব দেখুন (${tx.length})</span></div>
+${tx.slice(0,5).map(card).join('')}</div>`}
+function trans(){const l=tx.filter(t=>(!fp||t.p===fp)&&(!fs||t.v===fs)&&(t.trx+t.from).toLowerCase().includes(fq.toLowerCase()));
+return`<div class="col" style="gap:10px"><input id="q" value="${fq}" placeholder="🔍 TrxID, প্রেরক নম্বর দিয়ে খুঁজুন..." oninput="fq=this.value;render(1)">
+<div class="fl"><span class="fc ${!fp?'on2':''}" onclick="fp=null;render()">সব অপারেটর</span>${Object.keys(P).map(p=>`<span class="fc" style="${fp===p?`background:${P[p]}33;color:${P[p]};border-color:${P[p]}`:''}" onclick="fp=${fp===p?'null':`'${p}'`};render()">${p}</span>`).join('')}</div>
+<div class="fl">${[[null,'সব স্ট্যাটাস'],['ok','যাচাইকৃত (সফল)'],['pe','অপেক্ষমান'],['rej','বাতিল / ব্যর্থ']].map(s=>`<span class="fp ${fs===s[0]?'on2':''}" onclick="fs=${s[0]?`'${s[0]}'`:'null'};render()">${s[1]}</span>`).join('')}</div>
+<div class="row sb"><span class="sm" style="font-weight:500">মোট ফিল্টারকৃত লেনদেন: ${l.length} টি</span><span class="mu" style="cursor:pointer" onclick="confirmClear()">🗑</span></div>
+${l.length?l.map(card).join(''):`<div class="empty"><div style="font-size:40px">⏳</div><b>কোনো লেনদেন পাওয়া যায়নি</b><div class="sm">সার্চ ফিল্টার পরিবর্তন করে পুনরায় চেষ্টা করুন।</div></div>`}</div>`}
+function queue(){const l=pend();return`<div class="col" style="gap:12px"><div class="card s row" style="align-items:flex-start;gap:10px"><span class="em">ⓘ</span><div><b style="font-size:13px">অফলাইন সিঙ্ক্রোনাইজেশন ও সুরক্ষা</b><div class="sm" style="line-height:16px;margin-top:3px">মোবাইলে ইন্টারনেট না থাকলেও প্রাপ্ত প্রতিটি এসএমএস লোকাল Room ডাটাবেজে নিরাপদ থাকে। পরবর্তীতে কানেকশন পেলেই কোনো ডুপ্লিকেট ছাড়া কেন্দ্রীয় গেটওয়েতে আপলোড ও ভেরিফাই হবে।</div></div></div>
+<div class="row sb"><div><b style="font-size:16px">সিঙ্ক কিউ (${l.length})</b><div class="em" style="font-size:11px">নেটওয়ার্ক অনলাইন</div></div><button class="btn" style="flex:none;border-radius:10px" ${l.length?'':'disabled'} onclick="syncAll()">☁ সব সিঙ্ক করুন</button></div>
+${l.length?l.map(t=>`<div class="card"><div class="row sb"><div class="row g">${pb(t.p)}<b style="font-size:13px">Trx: ${t.trx}</b></div><b class="em" style="font-size:15px">${M(t.amt)}</b></div><div class="sm" style="margin:6px 0">প্রেরক: ${t.from} • ${TT[t.t]}</div>${t.retry?`<div style="font-size:10px;color:var(--er);margin-bottom:6px">ব্যর্থ প্রচেষ্টা: ${t.retry} বার • ত্রুটি: ${t.msg}</div>`:''}<div class="row sb">${sc(t.s)}<div class="row g"><button class="btn xs o" style="background:var(--sf)" onclick="detail(${t.id})">বিস্তারিত</button><button class="btn xs" onclick="syncOne(${t.id})">⟳ সিঙ্ক</button></div></div></div>`).join(''):`<div class="empty"><div style="font-size:52px;color:var(--em)">☁</div><b style="font-size:16px">সিঙ্ক কিউ সম্পূর্ণ খালি!</b><div class="sm">সব এসএমএস কেন্দ্রীয় BDPay গেটওয়ের সাথে সফলভাবে সিঙ্ক্রোনাইজড অবস্থায় রয়েছে।</div></div>`}</div>`}
+const TP=[['bKash পেমেন্ট প্রাপ্তি','bKash','bKash'],['Nagad টাকা প্রাপ্তি','NAGAD','Nagad'],['Rocket টাকা প্রাপ্তি','16216','Rocket'],['Upay পেমেন্ট','upay','Upay'],['বাংলা bKash মেসেজ','bKash','bKash']];
+function sim(){const t=tx[Math.min(tpl,3)];return`<div class="col"><div class="card s row" style="align-items:flex-start;gap:10px"><span class="em">⚗</span><div><b style="font-size:13px">এসএমএস পার্সার ও ইন্টিগ্রেশন ল্যাব</b><div class="sm" style="line-height:16px;margin-top:2px">বাস্তব লেনদেন খরচ না করেই bKash, Nagad, Rocket ও Upay এর পার্সিং লজিক, ডুপ্লিকেট সনাক্তকরণ ও গেটওয়ে সিঙ্ক সরাসরি পরীক্ষা করুন।</div></div></div>
+<b style="font-size:13px">নমুনা টেমপ্লেট নির্বাচন করুন:</b><div class="fl">${TP.map((x,i)=>`<span class="fc" style="${tpl===i?`border-color:${P[x[2]]};color:${P[x[2]]}`:'color:var(--t1)'};font-weight:600" onclick="tpl=${i};$('#sd').value='${x[1]}';$('#bd').value=B[${i}];parse()">${x[0]}</span>`).join('')}</div>
+<div><label>এসএমএস প্রেরক হেডার (যেমন: bKash, 16247, NAGAD)</label><input id="sd" value="bKash"></div>
+<div><label>ইনকামিং এসএমএস টেক্সট</label><textarea id="bd" style="height:130px">${B[0]}</textarea></div>
+<div class="row g"><button class="btn o" onclick="parse()"><span class="em">{ }</span> টোকেন দেখুন</button><button class="btn" onclick="inject()">⚡ পাইপলাইনে পাঠান</button></div>
+${simMsg?`<div class="card row sb" style="border-color:rgba(0,208,156,.5);font-size:12px"><span class="em">✔</span><span style="flex:1;margin:0 8px">${simMsg}</span><span class="sm" onclick="simMsg=null;render()">✕</span></div>`:''}
+${simRes?`<div class="card s big"><div class="row sb"><b style="font-size:14px">পার্সিং ফলাফল (Token Extraction)</b><span class="chip" style="border:0;border-radius:6px;color:${simRes.ok?'var(--ok)':'var(--er)'};background:${simRes.ok?'rgba(16,185,129,.15)':'rgba(239,68,68,.15)'}">${simRes.ok?'ভ্যালিড এমএফএস':'অকার্যকর'}</span></div><hr>
+<div class="kv"><span class="mu">চিহ্নিত অপারেটর</span>${pb(simRes.p)}</div><div class="kv"><span class="mu">Transaction ID (TrxID)</span><b class="em">${simRes.trx||'পাওয়া যায়নি'}</b></div><div class="kv"><span class="mu">টাকার পরিমাণ</span><span>${simRes.amt?M(simRes.amt):'পাওয়া যায়নি'}</span></div><div class="kv"><span class="mu">প্রেরক মোবাইল</span><span>${simRes.from||'পাওয়া যায়নি'}</span></div><div class="kv"><span class="mu">পার্সিং কনফিডেন্স</span><span>${simRes.ok?'95':'30'}%</span></div></div>`:''}</div>`}
+const B=['You have received payment Tk 1,250.00 from 01712345678. Ref: ORD-101. Fee Tk 0.00. Balance Tk 15,340.50. TrxID 9K48X7Z2 at 02/10/2026 18:25','Money Received Amount: Tk 2,500.00 Sender: 01812345678 TxnID: 71B99AA2 Balance: Tk 15,000.00 Time: 02/10/2026 14:15','Tk1,500.00 received from 017123456789 for A/C: 019876543211. Fee Tk0.00, Balance Tk5,600.00. TxnId: 24010200123','You have received Tk 800.00 from 01711223344. Txn ID: 4UP82910. Current balance Tk 3,400.00. Fee Tk 0.00.','আপনি 01712345678 থেকে Tk 1,250.00 পেয়েছেন। Ref: ORDER-99। ব্যালেন্স Tk 15,340.50। TrxID 9K48X7B5'];
+function doParse(){const s=$('#sd').value,b=$('#bd').value,l=(s+b).toLowerCase();
+const p=/bkash|বিকাশ|16247/.test(l)?'bKash':/nagad|নগদ|16167/.test(l)?'Nagad':/rocket|dbbl|16216|রকেট/.test(l)?'Rocket':/upay|16268|উপায়/.test(l)?'Upay':null;
+const a=b.match(/Tk\s?([\d,]+\.?\d*)/i),t=b.match(/(?:Trx\s?ID|Txn\s?ID|TxnId)[: ]+([A-Za-z0-9]+)/i),f=b.match(/01\d{9,10}/);
+return{p,amt:a?parseFloat(a[1].replace(/,/g,'')):0,trx:t&&t[1],from:f&&f[0],ok:!!(p&&a&&t)}}
+function parse(){simRes=doParse();const s=$('#sd').value,b=$('#bd').value;render();$('#sd').value=s;$('#bd').value=b}
+function inject(){const r=doParse();parse();if(!r.ok){simMsg='অকার্যকর এসএমএস — পাইপলাইনে পাঠানো হয়নি';render();return}
+if(tx.some(t=>t.trx===r.trx)){simMsg='ডুপ্লিকেট এসএমএস উপেক্ষিত';render();return}
+tx.unshift({id:Date.now(),p:r.p,trx:r.trx,amt:r.amt,from:r.from||'—',t:'rcv',v:'pe',s:'PENDING',time:'এইমাত্র',raw:$('#bd').value,msg:null});simMsg='পাইপলাইনে যুক্ত হয়েছে — কনফার্মেশন অপেক্ষমান';render()}
+function sets(){const f=(l,v)=>`<div><label>${l}</label><input value="${v}"></div>`;
+return`<div class="col" style="gap:16px"><div class="card s"><div class="row sb"><b style="font-size:13px"><span class="em">🛡</span> অ্যান্ড্রয়েড সিস্টেম পারমিশন স্ট্যাটাস</b><b style="color:var(--ok);font-size:11px">অনুমোদিত</b></div><div class="sm" style="margin-top:8px">ইনকামিং bKash, Nagad ও অন্যান্য এসএমএস মনিটর করার জন্য RECEIVE_SMS পারমিশন প্রয়োজন।</div></div>
+<div class="card s big col" style="gap:12px"><b style="font-size:14px">কেন্দ্রীয় BDPay গেটওয়ে সার্ভার কনফিগারেশন</b>${f('গেটওয়ে API এন্ডপয়েন্ট URL','https://api.bdpay.example/v1')}${f('ডিভাইস সিক্রেট / API কী (X-BDPAY-DEVICE-KEY)','bdp_live_sec_••••••')}<div class="row sb"><div><div class="sm">গেটওয়ে কানেকশন টেস্ট:</div><b style="font-size:11px;color:var(--ok)">সংযুক্ত (84ms)</b></div><button class="btn xs o" style="color:var(--em);border-radius:8px" onclick="toast('Ping সফল')">পিং পরীক্ষা</button></div></div>
+<div class="card s big col" style="gap:12px"><b style="font-size:14px">অ্যাকাউন্ট ও ডিভাইস প্রোফাইল</b><div><label>অ্যাকাউন্ট টাইপ</label><select><option>Merchant (মার্চেন্ট)</option><option>Personal (ব্যক্তিগত)</option><option>Personal Retail (PRP)</option><option>Agent (এজেন্ট)</option></select></div>
+<div class="row g">${f('ডিভাইস নাম','POS Terminal 01')}${f('ডিভাইস আইডি','BDP-A1')}</div><div class="row g">${f('সিম ১ ওয়ালেট নম্বর','017...')}${f('সিম ২ ওয়ালেট নম্বর','018...')}</div>
+<div class="row sb"><div><b style="font-size:13px">স্বয়ংক্রিয় সিঙ্ক (Auto-Sync)</b><div class="sm">এসএমএস পৌঁছানোর সাথে সাথে গেটওয়েতে পাঠানো হবে</div></div>${sw(auto,'auto=!auto;render()')}</div></div>
+<div class="card s big"><b style="font-size:14px">অপারেটর ভিত্তিক এসএমএস ট্র্যাকিং ফিল্টার</b><div style="margin-top:8px">${Object.keys(P).map(p=>`<div class="row sb" style="padding:4px 0"><b style="font-size:13px;color:${P[p]};font-weight:600">${p}</b>${sw(setP[p],`setP['${p}']=!setP['${p}'];render()`,P[p])}</div>`).join('')}</div></div>
+<button class="btn" style="flex:none;height:48px;font-size:14px" onclick="toast('সেটিংস সফলভাবে সংরক্ষিত হয়েছে!')">💾 সেটিংস সংরক্ষণ করুন</button></div>`}
+function detail(id){const t=tx.find(x=>x.id===id),k=(a,b)=>`<div class="kv"><span class="mu">${a}</span><span style="font-size:13px;font-weight:500">${b}</span></div>`;
+$('#modal').innerHTML=`<div class="ov" onclick="if(event.target==this)closeM()"><div class="dl"><div class="row sb">${pb(t.p)}<span class="sm" style="cursor:pointer;font-size:18px" onclick="closeM()">✕</span></div><div class="em" style="font-size:28px;font-weight:700;margin:12px 0 6px">${M(t.amt)}</div>${vb(t.v)}<hr style="margin:16px 0">
+${k('Transaction ID (TrxID)',t.trx+' <span class="em">⧉</span>')}${k('Sender Number',t.from+' <span class="em">⧉</span>')}${k('Transaction Type',TT[t.t])}${t.ref?k('Reference',t.ref):''}${t.bal?k('New Balance',M(t.bal)):''}${k('SMS Timestamp','02 Oct 2026, '+t.time)}
+<b style="font-size:13px;display:block;margin:12px 0 6px">BDPay Gateway Sync Response</b><div class="card" style="padding:12px"><div class="kv"><span class="sm">Sync Status:</span>${sc(t.s)}</div><div class="kv"><span class="sm">HTTP Response Code:</span><b>${t.code||'N/A'}</b></div><div class="sm">Gateway Message:</div><div style="font-size:12px;font-weight:500">${t.msg||'Awaiting initial sync response'}</div></div>
+<b style="font-size:13px;display:block;margin:14px 0 6px">Raw Incoming SMS Body</b><div class="raw">${t.raw}</div>
+<div class="row g" style="margin-top:20px"><button class="btn o" style="background:none" onclick="closeM()">বন্ধ করুন</button><button class="btn" onclick="syncOne(${t.id});closeM()">⟳ সিঙ্ক করুন</button></div></div></div>`}
+function closeM(){$('#modal').innerHTML=''}
+function confirmClear(){$('#modal').innerHTML=`<div class="ov"><div class="dl" style="border-radius:28px;padding:24px"><h3 style="font-size:20px;font-weight:500;margin-bottom:12px">ইতিহাস মুছে ফেলতে চান?</h3><div class="sm" style="font-size:13px">সব সংরক্ষিত এসএমএস লেনদেন ইতিহাস ডাটাবেজ থেকে মুছে ফেলা হবে। এই কাজ পূর্বাবস্থায় ফেরানো সম্ভব নয়।</div><div class="row" style="justify-content:flex-end;gap:20px;margin-top:20px;font-size:14px;font-weight:600"><span onclick="closeM()" style="cursor:pointer">বাতিল</span><span style="color:var(--er);cursor:pointer" onclick="tx=[];closeM();render()">মুছে ফেলুন</span></div></div></div>`}
+function syncOne(id){const t=tx.find(x=>x.id===id);t.s='SYNCED';t.v='ok';t.code=200;t.msg='Verified OK';t.retry=0;render();toast('সিঙ্ক সম্পন্ন')}
+function syncAll(){pend().forEach(t=>{t.s='SYNCED';t.v='ok';t.code=200;t.msg='Verified OK';t.retry=0});render();toast('সব সিঙ্ক সম্পন্ন')}
+function render(keep){const m=$('#main');m.innerHTML=[dash,trans,queue,sim,sets][tab]();nav();if(keep){const q=$('#q');q.focus();q.setSelectionRange(fq.length,fq.length)}}
+render();
+</script></body></html>

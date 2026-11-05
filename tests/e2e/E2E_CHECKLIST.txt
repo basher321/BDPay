@@ -1,0 +1,88 @@
+BDPay real-world test checklist (spec 14)
+==========================================
+
+Fill in the results table at the end by hand. Use small amounts (Tk 10-20) and return the test money afterwards.
+NOTES: no phone numbers, emails, TrxIDs, tokens or keys in this file - it is a repo file.
+Times: ops/e2e_queries.sql (Dashboard > SQL Editor, read-only).
+A failing test is written up as a new spec (14a, 14b ...) before release; this file only records results.
+
+Rules version loaded on staging: ______   (the number load_parser_rules.ts printed)
+
+
+HOW TO ADD A REAL SMS SAMPLE (tests/real_sms/)
+-----------------------------------------------
+For each operator you can test: at least 3 "money received" SMS, and at least 1 each of OTP, outgoing payment
+(send money / payment made), cash out and promotion from the same sender. Use only SMS from your own test
+payments.
+
+Two files per SMS, same name, in tests/real_sms/:
+  <operator>_<nn>_<what>.sms             for example bkash_01_received.sms, nagad_05_otp.sms
+      line 1: the sender exactly as the phone shows it (for example bKash, NAGAD, 16216)
+      line 2 to the end: the message exactly as received (keep the layout, spaces and line breaks)
+  <operator>_<nn>_<what>.expected.json
+      dropped SMS (OTP, outgoing, cash out, promotion):  {"keep": false}
+      kept SMS:  {"keep": true, "operator": "bkash", "trxId": "<TrxID as in the SMS, upper case>",
+                  "amountPoisha": <taka x 100, whole number>, "payerNumber": "<number>" or null,
+                  "kind": "received" or "payment"}
+Change before saving:
+  - every phone number -> a number from this fake list only (the repo scan rejects any other):
+      11 digits: 01700000001 ... 01700000099      12 digits (Rocket): 017000000001 ... 017000000099
+  - every person or shop name -> X
+Keep exactly: TrxIDs, amounts, dates, the layout.
+Nothing else goes into tests/real_sms/ (the tests fail on any other file).
+If an SMS does not give its expected result: add the sample first, then the rules are fixed (both
+parser_rules.json copies, same new version on every rule) - never change a sample to fit the rules.
+
+
+TESTS
+-----
+A. Real order -> pay box on the Thank you page -> pay page -> pay Tk 10 -> enter TrxID -> "পেমেন্ট নিশ্চিত হয়েছে"
+   -> Shopify order shows Paid with tag BDPay-verified. One run per operator available.
+B. Pay first and wait 2 minutes, then enter the TrxID -> verified at once.
+C. Pay Tk 11 for a Tk 10 order -> "টাকা মেলেনি" in the app -> approve -> pay page verified -> Shopify Paid.
+D. Enter a wrong TrxID, then change it to the right one -> verified; attempts left shown correctly.
+E. Phone in airplane mode -> customer pays and enters TrxID -> pay page pending -> airplane mode off ->
+   verified without touching the phone.
+F. Phone locked and not touched overnight (8+ hours) -> a morning payment verifies -> check heartbeat gaps.
+G. Reboot the phone, do not open the app -> a payment verifies.
+H. Dual SIM: a payment to the SIM 2 wallet -> the SMS shows the right SIM and wallet.
+I. Request a real OTP from an MFS app -> no new row in sms_messages.
+J. Send money out from the merchant wallet -> no new row.
+K. Cancel an unpaid order in Shopify -> the pay page shows expired.
+L. Leave a pay page open 60+ minutes without paying -> expired.
+M. Uninstall the app in Shopify -> the BDPay app shows Shopify not connected; reinstall from the app works.
+N. Two phones for one merchant (if available) -> both register; a payment to either verifies.
+O. Pay page on a slow connection (Chrome dev tools "Slow 4G" and "3G") -> usable, no broken screens.
+P. Leave the phone untouched for 24 hours -> count phoneSilent alerts (should be 0 when the phone had internet).
+
+If F or P show heartbeat gaps over 15 minutes while the phone was fine, write it in the notes; the fix (a longer
+phoneSilent limit or a different heartbeat method) becomes spec 14a.
+An operator you cannot test: result "not tested" with the reason; its rules stay marked SAMPLE.
+
+
+RESULTS
+-------
+| Test | Operator | Result (PASS / FAIL / not tested) | Time (s) | Date | Notes |
+|------|----------|-----------------------------------|----------|------|-------|
+| A    |          |                                   |          |      |       |
+| B    |          |                                   |          |      |       |
+| C    |          |                                   |          |      |       |
+| D    |          |                                   |          |      |       |
+| E    |          |                                   |          |      |       |
+| F    |          |                                   |          |      |       |
+| G    |          |                                   |          |      |       |
+| H    |          |                                   |          |      |       |
+| I    |          |                                   |          |      |       |
+| J    |          |                                   |          |      |       |
+| K    |          |                                   |          |      |       |
+| L    |          |                                   |          |      |       |
+| M    |          |                                   |          |      |       |
+| N    |          |                                   |          |      |       |
+| O    |          |                                   |          |      |       |
+| P    |          |                                   |          |      |       |
+
+Summary
+- Median verification time for online tests (query 1b): ______ s   (must be under 10 s)
+- phoneSilent alerts opened during test P while the phone had internet (query 5): ______   (must be 0)
+- Largest heartbeat gap in F / P (query 2): ______ min
+- Failing items written as new specs (14a, 14b ...): ______
