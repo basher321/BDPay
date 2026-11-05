@@ -21,15 +21,21 @@ if ($anon -eq '' -or $anon -match 'service_role' -or $anon.StartsWith('sb_secret
     exit 1
 }
 
+# Without the release signing file (production runbook step 8) a debug-signed test build is made instead.
+$mode = if (Test-Path (Join-Path $root 'app\android\key.properties')) { 'release' } else { 'debug' }
+if ($mode -eq 'debug') {
+    Write-Host 'No android\key.properties: building a TEST apk (debug-signed), not for the Play Store.' -ForegroundColor Yellow
+}
+
 Push-Location (Join-Path $root 'app')
 try {
-    flutter build apk --release "--dart-define=SUPABASE_URL=$supabaseUrl" "--dart-define=SUPABASE_ANON_KEY=$anon"
+    flutter build apk "--$mode" "--dart-define=SUPABASE_URL=$supabaseUrl" "--dart-define=SUPABASE_ANON_KEY=$anon"
     if ($LASTEXITCODE -ne 0) { throw "flutter build failed (exit $LASTEXITCODE)" }
 } finally {
     Pop-Location
 }
 
-$built = Join-Path $root 'app\build\app\outputs\flutter-apk\app-release.apk'
+$built = Join-Path $root "app\build\app\outputs\flutter-apk\app-$mode.apk"
 $liveDir = Join-Path $root 'live'
 $stamp = Get-Date -Format 'yyyyMMdd-HHmm'
 Copy-Item $built (Join-Path $liveDir "BDPay-$stamp.apk")
