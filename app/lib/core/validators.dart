@@ -15,6 +15,29 @@ final _email = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
 /// A simple text@text.text check.
 bool isValidEmail(String s) => _email.hasMatch(s);
 
+/// Spec 16: the internal address domain behind a username. No email is ever sent to it.
+const loginDomain = 'users.bdpay.app';
+
+/// Spec 16: the shortest password the app sends (Supabase minimum_password_length).
+const minPasswordLength = 6;
+
+/// Trimmed and lower case.
+String normalizeUsername(String s) => s.trim().toLowerCase();
+
+final _username = RegExp(r'^[a-z0-9_]{3,20}$');
+
+/// 3 to 20 English lower-case letters, digits or "_".
+bool isValidUsername(String s) => _username.hasMatch(s);
+
+/// "rahim" -> "rahim@users.bdpay.app".
+String usernameToEmail(String username) => '$username@$loginDomain';
+
+/// The username inside an internal address; any other address is returned as it is.
+String usernameOf(String email) {
+  const suffix = '@$loginDomain';
+  return email.endsWith(suffix) ? email.substring(0, email.length - suffix.length) : email;
+}
+
 /// English digits, no spaces or dashes, and a leading +880 / 880 changed to 0.
 String normalizeWalletNumber(String s) {
   final n = toEnglishDigits(s).replaceAll(RegExp(r'[\s-]'), '');

@@ -12,7 +12,7 @@ class OfflineException implements Exception {
   String toString() => 'OfflineException';
 }
 
-enum AuthFailure { badRequest, rateLimited, invalidCode, other }
+enum AuthFailure { badRequest, rateLimited, wrongPassword, userExists, weakPassword, notConfirmed, other }
 
 class AuthGatewayException implements Exception {
   const AuthGatewayException(this.kind);

@@ -40,7 +40,6 @@ enum SimSlot {
 
 enum AuthStatus {
   signedOut,
-  codeSent,
   needsBusinessName,
   signedIn;
 
@@ -50,8 +49,11 @@ enum AuthStatus {
 
 enum AuthResult {
   done,
-  invalidEmail,
-  wrongCode,
+  invalidUsername,
+  weakPassword,
+  wrongPassword,
+  usernameTaken,
+  notConfirmed,
   offline,
   tooSoon;
 

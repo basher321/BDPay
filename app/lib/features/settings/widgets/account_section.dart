@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/colors.dart';
+import '../../../core/validators.dart';
 import '../../../data/account_providers.dart';
 import '../../../data/providers.dart';
 import '../../../l10n/app_localizations.dart';
@@ -12,7 +13,7 @@ import '../settings_rules.dart';
 import 'confirm_dialog.dart';
 import 'settings_section.dart';
 
-/// Rule 11: business name, email and logout (blocked while any SMS is not on the server).
+/// Rule 11: business name, username and logout (blocked while any SMS is not on the server).
 class AccountSection extends ConsumerWidget {
   const AccountSection({super.key});
 
@@ -56,7 +57,7 @@ class AccountSection extends ConsumerWidget {
       title: l.accountTitle,
       children: [
         row(l.businessNameLabel, auth?.merchant?.businessName ?? '—', const Key('accountBusinessName')),
-        row(l.emailLabel, auth?.email ?? '—', const Key('accountEmail')),
+        row(l.usernameLabel, auth?.email == null ? '—' : usernameOf(auth!.email!), const Key('accountUsername')),
         const SizedBox(height: 10),
         AppButton.outline(
           key: const Key('logoutButton'),

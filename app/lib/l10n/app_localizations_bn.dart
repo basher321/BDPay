@@ -455,38 +455,58 @@ class AppLocalizationsBn extends AppLocalizations {
   String get yes => 'হ্যাঁ';
 
   @override
-  String get loginEmailPrompt => 'আপনার ইমেইল দিন';
+  String get loginTitle => 'লগইন করুন';
 
   @override
-  String get sendCode => 'কোড পাঠান';
+  String get signupTitle => 'নতুন অ্যাকাউন্ট খুলুন';
 
   @override
-  String get errInvalidEmail => 'সঠিক ইমেইল দিন';
+  String get usernameLabel => 'ইউজারনেম';
+
+  @override
+  String get passwordLabel => 'পাসওয়ার্ড';
+
+  @override
+  String get loginButton => 'লগইন';
+
+  @override
+  String get signupButton => 'অ্যাকাউন্ট খুলুন';
+
+  @override
+  String get toSignup => 'নতুন অ্যাকাউন্ট খুলুন';
+
+  @override
+  String get toLogin => 'অ্যাকাউন্ট আছে? লগইন করুন';
+
+  @override
+  String get forgotPassword => 'পাসওয়ার্ড ভুলে গেছেন?';
+
+  @override
+  String get forgotPasswordHelp =>
+      'BDPay সাপোর্টে যোগাযোগ করুন। তারা আপনার ইউজারনেমে নতুন পাসওয়ার্ড সেট করে দেবে।';
+
+  @override
+  String get usernameRule => 'ইংরেজি ছোট অক্ষর, সংখ্যা বা _ — ৩ থেকে ২০টি';
+
+  @override
+  String get errInvalidUsername =>
+      'ইউজারনেম: ইংরেজি ছোট অক্ষর, সংখ্যা বা _ — ৩ থেকে ২০টি';
+
+  @override
+  String get errWeakPassword => 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের দিন';
+
+  @override
+  String get errWrongPassword => 'ইউজারনেম বা পাসওয়ার্ড ভুল';
+
+  @override
+  String get errUsernameTaken => 'এই ইউজারনেম আগেই নেওয়া হয়েছে';
+
+  @override
+  String get errNotConfirmed =>
+      'অ্যাকাউন্ট এখনো চালু হয়নি — সাপোর্টে যোগাযোগ করুন';
 
   @override
   String get errTooSoon => 'একটু পরে আবার চেষ্টা করুন';
-
-  @override
-  String codeSentTo(String email) {
-    return '$email -এ ৬ সংখ্যার কোড পাঠানো হয়েছে';
-  }
-
-  @override
-  String get verifyCode => 'যাচাই করুন';
-
-  @override
-  String get errWrongCode => 'কোড ভুল — আবার দেখুন';
-
-  @override
-  String get resendCode => 'আবার কোড পাঠান';
-
-  @override
-  String resendIn(int s) {
-    return '$s সেকেন্ড পরে আবার পাঠানো যাবে';
-  }
-
-  @override
-  String get changeEmail => 'ইমেইল বদলান';
 
   @override
   String get businessNamePrompt => 'আপনার ব্যবসার নাম';
@@ -616,9 +636,6 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get businessNameLabel => 'ব্যবসার নাম';
-
-  @override
-  String get emailLabel => 'ইমেইল';
 
   @override
   String get logout => 'লগ আউট';

@@ -1,3 +1,4 @@
+import '../../core/validators.dart';
 import '../../domain/account_enums.dart';
 import '../../domain/enums.dart';
 import '../../domain/models/auth_state.dart';
@@ -9,7 +10,10 @@ import 'mock_store.dart';
 
 // MOCK - replaced in spec 13: accounts, wallets and stores live on the server.
 
-const demoEmail = 'demo@bdpay.test';
+/// Spec 16: the demo login is username "demo", password "123456".
+const demoUsername = 'demo';
+const demoPassword = '123456';
+const demoEmail = 'demo@$loginDomain';
 
 /// One merchant's in-memory data.
 class MockMerchantData {

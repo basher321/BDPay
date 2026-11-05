@@ -10,26 +10,23 @@ import 'rows.dart';
 import 'table_gateway.dart';
 import 'value_stream.dart';
 
-/// Spec 13: email OTP sign-in with Supabase, then the merchant owned by this user. Never logs the email or code.
+/// Spec 16: username + password sign-in with Supabase, then the merchant owned by this user (spec 13).
+/// Never logs the username or the password.
 /// deviceId stays null until spec 13a.
 class SupabaseAuthRepository implements AuthRepository {
-  SupabaseAuthRepository({required this._auth, required this._tables, DateTime Function()? clock})
-      : _clock = clock ?? (() => DateTime.now().toUtc());
+  SupabaseAuthRepository({required this._auth, required this._tables});
 
-  static const resendWait = Duration(seconds: 60);
   static const _ownerKey = 'merchants_owner_id_key';
 
   final AuthGateway _auth;
   final TableGateway _tables;
-  final DateTime Function() _clock;
   final _state = ValueStream<AuthState>(AuthState.signedOut);
-  final _lastSent = <String, DateTime>{};
   StreamSubscription<void>? _sub;
 
   /// Restores a saved session (signed in across restarts) and follows sign-outs from elsewhere.
   Future<void> start() async {
     _sub ??= _auth.changes.listen((_) {
-      if (_auth.currentUserId == null && _state.value.status != AuthStatus.codeSent) {
+      if (_auth.currentUserId == null) {
         _state.value = AuthState.signedOut;
       }
     });
@@ -52,38 +49,48 @@ class SupabaseAuthRepository implements AuthRepository {
   Stream<AuthState> watch() => _state.watch();
 
   @override
-  Future<AuthResult> sendCode(String email) async {
-    final e = normalizeEmail(email);
-    if (!isValidEmail(e)) return AuthResult.invalidEmail;
-    final now = _clock();
-    final last = _lastSent[e];
-    if (last != null && now.difference(last) < resendWait) return AuthResult.tooSoon;
-    try {
-      await _auth.sendOtp(e);
-    } on AuthGatewayException catch (x) {
-      return switch (x.kind) {
-        AuthFailure.badRequest => AuthResult.invalidEmail,
-        AuthFailure.rateLimited => AuthResult.tooSoon,
-        AuthFailure.invalidCode || AuthFailure.other => AuthResult.offline,
-      };
-    } on OfflineException {
-      return AuthResult.offline;
-    }
-    _lastSent[e] = now;
-    _state.value = AuthState(status: AuthStatus.codeSent, email: e);
-    return AuthResult.done;
+  Future<AuthResult> signIn(String username, String password) async {
+    final u = normalizeUsername(username);
+    if (!isValidUsername(u)) return AuthResult.invalidUsername;
+    if (password.length < minPasswordLength) return AuthResult.wrongPassword;
+    final email = usernameToEmail(u);
+    return _run(() => _auth.signIn(email, password), email, (kind) => switch (kind) {
+          AuthFailure.wrongPassword || AuthFailure.badRequest => AuthResult.wrongPassword,
+          AuthFailure.rateLimited => AuthResult.tooSoon,
+          AuthFailure.notConfirmed => AuthResult.notConfirmed,
+          _ => AuthResult.offline,
+        });
   }
 
   @override
-  Future<AuthResult> verifyCode(String email, String code) async {
-    final e = normalizeEmail(email);
+  Future<AuthResult> signUp(String username, String password) async {
+    final u = normalizeUsername(username);
+    if (!isValidUsername(u)) return AuthResult.invalidUsername;
+    if (password.length < minPasswordLength) return AuthResult.weakPassword;
+    final email = usernameToEmail(u);
+    return _run(() => _auth.signUp(email, password), email, (kind) => switch (kind) {
+          AuthFailure.userExists => AuthResult.usernameTaken,
+          AuthFailure.weakPassword => AuthResult.weakPassword,
+          AuthFailure.badRequest => AuthResult.invalidUsername,
+          AuthFailure.rateLimited => AuthResult.tooSoon,
+          AuthFailure.notConfirmed => AuthResult.notConfirmed,
+          _ => AuthResult.offline,
+        });
+  }
+
+  /// Calls the gateway, then looks up the merchant of the signed-in user.
+  Future<AuthResult> _run(
+    Future<void> Function() call,
+    String email,
+    AuthResult Function(AuthFailure) mapFailure,
+  ) async {
     try {
-      await _auth.verifyOtp(e, toEnglishDigits(code.trim()));
+      await call();
       final userId = _auth.currentUserId;
-      if (userId == null) return AuthResult.wrongCode;
-      await _enter(userId, e);
+      if (userId == null) return AuthResult.offline;
+      await _enter(userId, email);
     } on AuthGatewayException catch (x) {
-      return x.kind == AuthFailure.rateLimited ? AuthResult.tooSoon : AuthResult.wrongCode;
+      return mapFailure(x.kind);
     } on OfflineException {
       return AuthResult.offline;
     }
@@ -118,7 +125,6 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   Future<void> signOut() async {
     await _auth.signOut();
-    _lastSent.clear();
     _state.value = AuthState.signedOut;
   }
 }

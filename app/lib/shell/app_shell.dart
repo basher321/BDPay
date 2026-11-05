@@ -7,10 +7,9 @@ import '../data/sync_coordinator.dart';
 import '../domain/account_enums.dart';
 import '../domain/models/app_settings.dart';
 import '../features/auth/business_name_screen.dart';
-import '../features/auth/code_screen.dart';
 import '../features/auth/device_limit_screen.dart';
 import '../data/device/device_registration.dart';
-import '../features/auth/email_screen.dart';
+import '../features/auth/login_screen.dart';
 import '../features/dev_lab/dev_lab_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/queue/queue_screen.dart';
@@ -64,9 +63,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       case null:
         return const Scaffold();
       case AuthStatus.signedOut:
-        return const EmailScreen();
-      case AuthStatus.codeSent:
-        return CodeScreen(email: auth!.email ?? '');
+        return const LoginScreen();
       case AuthStatus.needsBusinessName:
         return const BusinessNameScreen();
       case AuthStatus.signedIn:

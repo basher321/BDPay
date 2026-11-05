@@ -898,65 +898,107 @@ abstract class AppLocalizations {
   /// **'হ্যাঁ'**
   String get yes;
 
-  /// No description provided for @loginEmailPrompt.
+  /// No description provided for @loginTitle.
   ///
   /// In bn, this message translates to:
-  /// **'আপনার ইমেইল দিন'**
-  String get loginEmailPrompt;
+  /// **'লগইন করুন'**
+  String get loginTitle;
 
-  /// No description provided for @sendCode.
+  /// No description provided for @signupTitle.
   ///
   /// In bn, this message translates to:
-  /// **'কোড পাঠান'**
-  String get sendCode;
+  /// **'নতুন অ্যাকাউন্ট খুলুন'**
+  String get signupTitle;
 
-  /// No description provided for @errInvalidEmail.
+  /// No description provided for @usernameLabel.
   ///
   /// In bn, this message translates to:
-  /// **'সঠিক ইমেইল দিন'**
-  String get errInvalidEmail;
+  /// **'ইউজারনেম'**
+  String get usernameLabel;
+
+  /// No description provided for @passwordLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'পাসওয়ার্ড'**
+  String get passwordLabel;
+
+  /// No description provided for @loginButton.
+  ///
+  /// In bn, this message translates to:
+  /// **'লগইন'**
+  String get loginButton;
+
+  /// No description provided for @signupButton.
+  ///
+  /// In bn, this message translates to:
+  /// **'অ্যাকাউন্ট খুলুন'**
+  String get signupButton;
+
+  /// No description provided for @toSignup.
+  ///
+  /// In bn, this message translates to:
+  /// **'নতুন অ্যাকাউন্ট খুলুন'**
+  String get toSignup;
+
+  /// No description provided for @toLogin.
+  ///
+  /// In bn, this message translates to:
+  /// **'অ্যাকাউন্ট আছে? লগইন করুন'**
+  String get toLogin;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In bn, this message translates to:
+  /// **'পাসওয়ার্ড ভুলে গেছেন?'**
+  String get forgotPassword;
+
+  /// No description provided for @forgotPasswordHelp.
+  ///
+  /// In bn, this message translates to:
+  /// **'BDPay সাপোর্টে যোগাযোগ করুন। তারা আপনার ইউজারনেমে নতুন পাসওয়ার্ড সেট করে দেবে।'**
+  String get forgotPasswordHelp;
+
+  /// No description provided for @usernameRule.
+  ///
+  /// In bn, this message translates to:
+  /// **'ইংরেজি ছোট অক্ষর, সংখ্যা বা _ — ৩ থেকে ২০টি'**
+  String get usernameRule;
+
+  /// No description provided for @errInvalidUsername.
+  ///
+  /// In bn, this message translates to:
+  /// **'ইউজারনেম: ইংরেজি ছোট অক্ষর, সংখ্যা বা _ — ৩ থেকে ২০টি'**
+  String get errInvalidUsername;
+
+  /// No description provided for @errWeakPassword.
+  ///
+  /// In bn, this message translates to:
+  /// **'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের দিন'**
+  String get errWeakPassword;
+
+  /// No description provided for @errWrongPassword.
+  ///
+  /// In bn, this message translates to:
+  /// **'ইউজারনেম বা পাসওয়ার্ড ভুল'**
+  String get errWrongPassword;
+
+  /// No description provided for @errUsernameTaken.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই ইউজারনেম আগেই নেওয়া হয়েছে'**
+  String get errUsernameTaken;
+
+  /// No description provided for @errNotConfirmed.
+  ///
+  /// In bn, this message translates to:
+  /// **'অ্যাকাউন্ট এখনো চালু হয়নি — সাপোর্টে যোগাযোগ করুন'**
+  String get errNotConfirmed;
 
   /// No description provided for @errTooSoon.
   ///
   /// In bn, this message translates to:
   /// **'একটু পরে আবার চেষ্টা করুন'**
   String get errTooSoon;
-
-  /// No description provided for @codeSentTo.
-  ///
-  /// In bn, this message translates to:
-  /// **'{email} -এ ৬ সংখ্যার কোড পাঠানো হয়েছে'**
-  String codeSentTo(String email);
-
-  /// No description provided for @verifyCode.
-  ///
-  /// In bn, this message translates to:
-  /// **'যাচাই করুন'**
-  String get verifyCode;
-
-  /// No description provided for @errWrongCode.
-  ///
-  /// In bn, this message translates to:
-  /// **'কোড ভুল — আবার দেখুন'**
-  String get errWrongCode;
-
-  /// No description provided for @resendCode.
-  ///
-  /// In bn, this message translates to:
-  /// **'আবার কোড পাঠান'**
-  String get resendCode;
-
-  /// No description provided for @resendIn.
-  ///
-  /// In bn, this message translates to:
-  /// **'{s} সেকেন্ড পরে আবার পাঠানো যাবে'**
-  String resendIn(int s);
-
-  /// No description provided for @changeEmail.
-  ///
-  /// In bn, this message translates to:
-  /// **'ইমেইল বদলান'**
-  String get changeEmail;
 
   /// No description provided for @businessNamePrompt.
   ///
@@ -1203,12 +1245,6 @@ abstract class AppLocalizations {
   /// In bn, this message translates to:
   /// **'ব্যবসার নাম'**
   String get businessNameLabel;
-
-  /// No description provided for @emailLabel.
-  ///
-  /// In bn, this message translates to:
-  /// **'ইমেইল'**
-  String get emailLabel;
 
   /// No description provided for @logout.
   ///

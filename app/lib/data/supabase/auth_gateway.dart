@@ -2,7 +2,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'gateway_errors.dart';
 
-/// Email OTP sign-in. Thin: no app rules here, only calls and error translation.
+/// Spec 16: email + password sign-in (the email is the internal address of a username).
+/// Thin: no app rules here, only calls and error translation. Never logs the password.
 abstract interface class AuthGateway {
   String? get currentUserId;
 
@@ -12,10 +13,10 @@ abstract interface class AuthGateway {
   Stream<void> get changes;
 
   /// Throws [AuthGatewayException] or [OfflineException].
-  Future<void> sendOtp(String email);
+  Future<void> signIn(String email, String password);
 
-  /// Throws [AuthGatewayException] or [OfflineException].
-  Future<void> verifyOtp(String email, String code);
+  /// Throws [AuthGatewayException] or [OfflineException]. No session afterwards -> notConfirmed.
+  Future<void> signUp(String email, String password);
 
   Future<void> signOut();
 }
@@ -35,11 +36,16 @@ class SupabaseAuthGateway implements AuthGateway {
   Stream<void> get changes => _auth.onAuthStateChange.map((_) {});
 
   @override
-  Future<void> sendOtp(String email) => _guard(() => _auth.signInWithOtp(email: email, shouldCreateUser: true));
+  Future<void> signIn(String email, String password) =>
+      _guard(() => _auth.signInWithPassword(email: email, password: password));
 
   @override
-  Future<void> verifyOtp(String email, String code) =>
-      _guard(() => _auth.verifyOTP(email: email, token: code, type: OtpType.email));
+  Future<void> signUp(String email, String password) => _guard(() async {
+        final r = await _auth.signUp(email: email, password: password);
+        // "Confirm email" is on in the project: the account exists but cannot log in.
+        if (r.session == null) throw const AuthGatewayException(AuthFailure.notConfirmed);
+        return r;
+      });
 
   @override
   Future<void> signOut() async {
@@ -54,6 +60,8 @@ class SupabaseAuthGateway implements AuthGateway {
   static Future<void> _guard(Future<Object?> Function() call) async {
     try {
       await call();
+    } on AuthGatewayException {
+      rethrow;
     } on AuthRetryableFetchException {
       throw const OfflineException();
     } on AuthException catch (e) {
@@ -65,14 +73,15 @@ class SupabaseAuthGateway implements AuthGateway {
   }
 }
 
-/// Supabase Auth status + error code -> [AuthFailure] (plan 13 section 3).
+/// Supabase Auth status + error code -> [AuthFailure] (plan 16 step 4).
 AuthFailure authFailureOf(String? status, String? code) {
   if (status == '429' || code == 'over_email_send_rate_limit' || code == 'over_request_rate_limit') {
     return AuthFailure.rateLimited;
   }
-  if (code == 'otp_expired' || code == 'invalid_credentials' || status == '401' || status == '403') {
-    return AuthFailure.invalidCode;
-  }
+  if (code == 'user_already_exists' || code == 'email_exists') return AuthFailure.userExists;
+  if (code == 'weak_password') return AuthFailure.weakPassword;
+  if (code == 'email_not_confirmed') return AuthFailure.notConfirmed;
+  if (code == 'invalid_credentials' || status == '401' || status == '403') return AuthFailure.wrongPassword;
   if (code == 'email_address_invalid' || code == 'validation_failed' || status == '400' || status == '422') {
     return AuthFailure.badRequest;
   }

@@ -283,30 +283,23 @@
   "simSlot2": "সিম ২",
   "simUnknown": "জানি না",
   "yes": "হ্যাঁ",
-  "loginEmailPrompt": "আপনার ইমেইল দিন",
-  "sendCode": "কোড পাঠান",
-  "errInvalidEmail": "সঠিক ইমেইল দিন",
+  "loginTitle": "লগইন করুন",
+  "signupTitle": "নতুন অ্যাকাউন্ট খুলুন",
+  "usernameLabel": "ইউজারনেম",
+  "passwordLabel": "পাসওয়ার্ড",
+  "loginButton": "লগইন",
+  "signupButton": "অ্যাকাউন্ট খুলুন",
+  "toSignup": "নতুন অ্যাকাউন্ট খুলুন",
+  "toLogin": "অ্যাকাউন্ট আছে? লগইন করুন",
+  "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?",
+  "forgotPasswordHelp": "BDPay সাপোর্টে যোগাযোগ করুন। তারা আপনার ইউজারনেমে নতুন পাসওয়ার্ড সেট করে দেবে।",
+  "usernameRule": "ইংরেজি ছোট অক্ষর, সংখ্যা বা _ — ৩ থেকে ২০টি",
+  "errInvalidUsername": "ইউজারনেম: ইংরেজি ছোট অক্ষর, সংখ্যা বা _ — ৩ থেকে ২০টি",
+  "errWeakPassword": "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের দিন",
+  "errWrongPassword": "ইউজারনেম বা পাসওয়ার্ড ভুল",
+  "errUsernameTaken": "এই ইউজারনেম আগেই নেওয়া হয়েছে",
+  "errNotConfirmed": "অ্যাকাউন্ট এখনো চালু হয়নি — সাপোর্টে যোগাযোগ করুন",
   "errTooSoon": "একটু পরে আবার চেষ্টা করুন",
-  "codeSentTo": "{email} -এ ৬ সংখ্যার কোড পাঠানো হয়েছে",
-  "@codeSentTo": {
-    "placeholders": {
-      "email": {
-        "type": "String"
-      }
-    }
-  },
-  "verifyCode": "যাচাই করুন",
-  "errWrongCode": "কোড ভুল — আবার দেখুন",
-  "resendCode": "আবার কোড পাঠান",
-  "resendIn": "{s} সেকেন্ড পরে আবার পাঠানো যাবে",
-  "@resendIn": {
-    "placeholders": {
-      "s": {
-        "type": "int"
-      }
-    }
-  },
-  "changeEmail": "ইমেইল বদলান",
   "businessNamePrompt": "আপনার ব্যবসার নাম",
   "startButton": "শুরু করুন",
   "setupTitle": "সেটআপ বাকি",
@@ -365,7 +358,6 @@
   "simulateOffline": "অফলাইন সিমুলেট",
   "accountTitle": "অ্যাকাউন্ট",
   "businessNameLabel": "ব্যবসার নাম",
-  "emailLabel": "ইমেইল",
   "logout": "লগ আউট",
   "logoutBlocked": "আগে বাকি {n} টি এসএমএস পাঠান",
   "@logoutBlocked": {

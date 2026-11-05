@@ -5,38 +5,44 @@ import '../../domain/models/merchant.dart';
 import '../../domain/repositories/auth_repository.dart';
 import 'mock_account_data.dart';
 
-/// MOCK - replaced in spec 13 (real email login). The code is always "123456".
-/// Never logs the email or the code.
+/// MOCK - the demo build and tests. Spec 16: username + password; "demo" / "123456" is built in.
+/// Passwords live only in memory and are never logged.
 class MockAuthRepository implements AuthRepository {
   MockAuthRepository(this._data);
 
-  static const _mockCode = '123456';
-  static const resendWait = Duration(seconds: 60);
-
   final MockAccountData _data;
-  final _lastSent = <String, DateTime>{};
+  final _passwords = <String, String>{demoEmail: demoPassword};
   int _newMerchants = 0;
 
   @override
   Stream<AuthState> watch() => _data.auth.watch();
 
   @override
-  Future<AuthResult> sendCode(String email) async {
-    final e = normalizeEmail(email);
-    if (!isValidEmail(e)) return AuthResult.invalidEmail;
+  Future<AuthResult> signIn(String username, String password) async {
+    final u = normalizeUsername(username);
+    if (!isValidUsername(u)) return AuthResult.invalidUsername;
+    if (password.length < minPasswordLength) return AuthResult.wrongPassword;
     if (!_data.online) return AuthResult.offline;
-    final now = _data.clock();
-    final last = _lastSent[e];
-    if (last != null && now.difference(last) < resendWait) return AuthResult.tooSoon;
-    _lastSent[e] = now;
-    _data.auth.value = AuthState(status: AuthStatus.codeSent, email: e);
+    final e = usernameToEmail(u);
+    if (_passwords[e] != password) return AuthResult.wrongPassword;
+    _enter(e);
     return AuthResult.done;
   }
 
   @override
-  Future<AuthResult> verifyCode(String email, String code) async {
-    if (toEnglishDigits(code.trim()) != _mockCode) return AuthResult.wrongCode;
-    final e = normalizeEmail(email);
+  Future<AuthResult> signUp(String username, String password) async {
+    final u = normalizeUsername(username);
+    if (!isValidUsername(u)) return AuthResult.invalidUsername;
+    if (password.length < minPasswordLength) return AuthResult.weakPassword;
+    if (!_data.online) return AuthResult.offline;
+    final e = usernameToEmail(u);
+    if (_passwords.containsKey(e)) return AuthResult.usernameTaken;
+    _passwords[e] = password;
+    _enter(e);
+    return AuthResult.done;
+  }
+
+  void _enter(String e) {
     if (e == demoEmail) _data.accounts.putIfAbsent(e, buildDemoMerchant);
     final account = _data.accounts[e];
     _data.auth.value = account == null
@@ -48,7 +54,6 @@ class MockAuthRepository implements AuthRepository {
             deviceId: account.deviceId,
           );
     _data.changed();
-    return AuthResult.done;
   }
 
   @override
