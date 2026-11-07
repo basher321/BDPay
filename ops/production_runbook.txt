@@ -111,6 +111,8 @@ secret or token, or is public by design like health):
     supabase functions deploy shopify-sync --no-verify-jwt
     supabase functions deploy alerts-check --no-verify-jwt
     supabase functions deploy health --no-verify-jwt
+    supabase functions deploy merchant-api --no-verify-jwt
+    supabase functions deploy store-webhooks-sync --no-verify-jwt
 
 Called by the signed-in app (JWT check stays on):
 
@@ -119,6 +121,7 @@ Called by the signed-in app (JWT check stays on):
     supabase functions deploy shopify-connect-link
     supabase functions deploy shopify-status
     supabase functions deploy alerts-list
+    supabase functions deploy store-connections
 
 check: Dashboard > Edge Functions lists 18 functions, the 13 in the first list with "Verify JWT" off;
     Invoke-RestMethod https://<ref>.supabase.co/functions/v1/health

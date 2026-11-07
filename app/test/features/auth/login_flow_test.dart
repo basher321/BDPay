@@ -54,6 +54,17 @@ void main() {
     expect(pw.obscureText, isTrue);
   });
 
+  testWidgets('the eye button shows and hides the password', (tester) async {
+    await pumpAccountApp(tester);
+    bool obscured() => tester.widget<TextField>(find.byKey(const Key('passwordField'))).obscureText;
+    await tester.tap(find.byKey(const Key('passwordToggle')));
+    await tester.pump();
+    expect(obscured(), isFalse);
+    await tester.tap(find.byKey(const Key('passwordToggle')));
+    await tester.pump();
+    expect(obscured(), isTrue);
+  });
+
   testWidgets('demo / 123456 shows the হোম tab', (tester) async {
     await pumpAccountApp(tester);
     await signIn(tester, 'demo');

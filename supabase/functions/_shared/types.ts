@@ -145,3 +145,70 @@ export interface Match {
   note: string | null;
   createdAt: string;
 }
+
+// ---- Spec 17: store connections (all website platforms) ----
+
+/** Spec 17 fixed list (same values in Dart and the stores.platform CHECK). */
+export const PLATFORMS = [
+  "shopify",
+  "wordpress",
+  "webflow",
+  "framer",
+  "wix",
+  "squarespace",
+  "bubble",
+  "drupal",
+  "joomla",
+  "hubspot",
+  "duda",
+  "react",
+  "nextjs",
+  "vue",
+  "laravel",
+  "nodejs",
+  "django",
+  "ghost",
+  "magento",
+  "prestashop",
+  "webstudio",
+  "astro",
+  "sveltekit",
+  "nuxt",
+  "other",
+] as const;
+export type Platform = typeof PLATFORMS[number];
+export type ConnectionKind = "oauth" | "api";
+export type ConnectionStatus = "active" | "disabled" | "uninstalled";
+
+/** What the app sees. Never holds the API key, its hash or any secret. */
+export interface StoreConnection {
+  id: string;
+  merchantId: string;
+  platform: Platform;
+  kind: ConnectionKind;
+  siteName: string;
+  siteUrl: string | null;
+  webhookUrl: string | null;
+  apiKeyPrefix: string | null;
+  status: ConnectionStatus;
+  lastError: string | null;
+  connectedAt: string;
+}
+
+/** Server-only fields next to the public ones. */
+export interface ConnectionRecord extends StoreConnection {
+  apiKeyHash: string | null;
+  secretVersion: number;
+}
+
+export type OrderSyncStatus = "pending" | "done" | "failed";
+
+export interface OrderSync {
+  id: string;
+  merchantId: string;
+  sessionId: string;
+  status: OrderSyncStatus;
+  attempts: number;
+  nextAttemptAt: string;
+  lastError: string | null;
+}

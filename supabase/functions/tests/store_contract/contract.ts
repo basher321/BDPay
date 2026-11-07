@@ -46,6 +46,15 @@ const STORE_METHODS = {
   getSmsResults: true,
   expireDue: true,
   hitRateLimit: true,
+  listConnections: true,
+  getConnection: true,
+  findConnectionByKeyHash: true,
+  createApiConnection: true,
+  updateConnection: true,
+  findSessionByExternalOrder: true,
+  enqueueOrderSync: true,
+  listDueOrderSyncs: true,
+  updateOrderSync: true,
 } as const satisfies Record<keyof Store, true>;
 
 const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
@@ -537,6 +546,82 @@ export function runContract(
     assert.equal(await store.hitRateLimit(key, 2, 3600), true);
     assert.equal(await store.hitRateLimit(key, 2, 3600), true);
     assert.equal(await store.hitRateLimit(key, 2, 3600), false);
+  });
+
+  // ---- Spec 17: store connections and order syncs ----
+
+  test("connections: create, duplicate, get, find by key hash, update, list", async () => {
+    const { maker, store } = await setup();
+    const m = await maker.newMerchant();
+    const fields = {
+      merchantId: m.merchantId,
+      platform: "laravel" as const,
+      siteName: "Test site",
+      siteUrl: `https://t-${randomHex(4)}.example.com`,
+      apiKeyPrefix: "bdp_live_abc",
+      apiKeyHash: randomHex(32),
+    };
+    const c = await store.createApiConnection(fields);
+    assert.notEqual(c, "duplicate");
+    if (c === "duplicate") return;
+    assert.equal(c.kind, "api");
+    assert.equal(c.status, "active");
+    assert.equal(c.webhookUrl, null);
+    assert.match(c.connectedAt, ISO_UTC);
+    assert.equal(
+      await store.createApiConnection({ ...fields, apiKeyHash: randomHex(32) }),
+      "duplicate",
+    );
+    assert.deepEqual(await store.getConnection(c.id), c);
+    assert.deepEqual(await store.findConnectionByKeyHash(fields.apiKeyHash), c);
+    assert.equal(await store.findConnectionByKeyHash(randomHex(32)), null);
+    const u = await store.updateConnection(c.id, {
+      webhookUrl: "https://example.com/hook",
+      status: "disabled",
+    });
+    assert.equal(u.webhookUrl, "https://example.com/hook");
+    assert.equal(u.status, "disabled");
+    const list = await store.listConnections(m.merchantId);
+    assert.ok(list.some((x) => x.id === c.id && x.status === "disabled"));
+    assert.ok(list.every((x) => x.merchantId === m.merchantId));
+    await assert.rejects(
+      () => store.updateConnection(crypto.randomUUID(), { status: "disabled" }),
+      (e: unknown) => e instanceof StoreError && e.code === "notFound",
+    );
+  });
+
+  test("sessions by external order; order syncs: one per session, due list, update", async () => {
+    const { maker, store } = await setup();
+    const m = await maker.newMerchant();
+    const orderId = `order-${randomHex(4)}`;
+    const s = await newSession(store, maker, m.merchantId, {
+      externalOrderId: orderId,
+    });
+    assert.deepEqual(
+      await store.findSessionByExternalOrder(s.storeId, orderId),
+      s,
+    );
+    assert.equal(
+      await store.findSessionByExternalOrder(s.storeId, "missing"),
+      null,
+    );
+    const a = await store.enqueueOrderSync(m.merchantId, s.id);
+    const b = await store.enqueueOrderSync(m.merchantId, s.id);
+    assert.equal(a.id, b.id);
+    assert.equal(a.status, "pending");
+    const later = new Date(Date.now() + 60_000).toISOString();
+    assert.ok(
+      (await store.listDueOrderSyncs(later, 500)).some((x) => x.id === a.id),
+    );
+    await store.updateOrderSync(a.id, {
+      status: "done",
+      attempts: 1,
+      nextAttemptAt: later,
+      lastError: null,
+    });
+    assert.ok(
+      !(await store.listDueOrderSyncs(later, 500)).some((x) => x.id === a.id),
+    );
   });
 
   test("coverage: every Store method was called by the suite", () => {

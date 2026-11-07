@@ -199,6 +199,9 @@ const NO_VERIFY_JWT: Record<string, boolean> = {
   "shopify-connect-link": false,
   "shopify-status": false,
   "alerts-list": false,
+  "merchant-api": true,
+  "store-webhooks-sync": true,
+  "store-connections": false,
 };
 const PROD_NO_VERIFY_JWT: Record<string, boolean> = {
   ...NO_VERIFY_JWT,

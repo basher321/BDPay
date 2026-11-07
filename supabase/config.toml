@@ -456,6 +456,13 @@ verify_jwt = false
 [functions.health]
 verify_jwt = false
 
+# Spec 17: merchant-api checks the BDPay API key; store-webhooks-sync checks the cron secret.
+[functions.merchant-api]
+verify_jwt = false
+
+[functions.store-webhooks-sync]
+verify_jwt = false
+
 # BDPay (spec 13): the Bangla 6-digit login code email.
 [auth.email.template.magic_link]
 subject = "BDPay লগইন কোড"

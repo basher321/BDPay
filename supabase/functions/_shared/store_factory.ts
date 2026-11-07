@@ -8,10 +8,14 @@ import { depsFromEnv as fakeDeps } from "./fake_store.ts";
 import { releaseFromEnv } from "./heartbeat.ts";
 import { consoleLogger, type Deps } from "./http.ts";
 import { StoreMatcher } from "./matcher.ts";
-import { NoopNotifier } from "./notifier.ts";
 import { PgStore } from "./pg_store.ts";
 import { storeLimiter } from "./rate_limit.ts";
 import { SupabaseUserVerifier } from "./supabase_user_verifier.ts";
+import {
+  fetchSender,
+  WebhookDelivery,
+  WebhookNotifier,
+} from "./webhook_notifier.ts";
 
 let real: Deps | null = null;
 
@@ -24,7 +28,17 @@ export function depsFromEnv(
   if (!url || !key) return null;
   if (real === null) {
     const store = PgStore.fromEnv(url, key);
-    const notifier = new NoopNotifier();
+    // Spec 17: verified payments of API connections are sent to the website's webhook.
+    const notifier = new WebhookNotifier(
+      store,
+      new WebhookDelivery(
+        store,
+        fetchSender,
+        get("PAY_TOKEN_SECRET"),
+        Date.now,
+      ),
+      consoleLogger,
+    );
     real = {
       store,
       users: new SupabaseUserVerifier(url, key),
@@ -38,6 +52,8 @@ export function depsFromEnv(
         payPageOrigin: get("PAY_PAGE_ORIGIN"),
         cronSecret: get("CRON_SECRET"),
         rateLimitPepper: get("RATE_LIMIT_PEPPER"),
+        payTokenSecret: get("PAY_TOKEN_SECRET"),
+        payPageUrl: get("PAY_PAGE_URL"),
       },
     };
   }

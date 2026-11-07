@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'widgets/account_section.dart';
+import 'widgets/connections_section.dart';
 import 'widgets/developer_section.dart';
 import 'widgets/device_section.dart';
 import 'widgets/operators_section.dart';
@@ -19,6 +20,7 @@ class SettingsScreen extends StatelessWidget {
       key: const Key('settingsList'),
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
       children: [
+        gap(const ConnectionsSection()),
         gap(const ShopifySection()),
         gap(const WalletsSection()),
         gap(const DeviceSection()),

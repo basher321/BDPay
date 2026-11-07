@@ -11,8 +11,8 @@ select has_extension('pg_net', 'pg_net is installed');
 select results_eq(
   $$select jobname::text, schedule::text from cron.job where jobname like 'bdpay-%' order by jobname$$,
   $$values ('bdpay-alerts-check', '*/5 * * * *'), ('bdpay-claims-expire', '*/5 * * * *'),
-           ('bdpay-shopify-sync', '*/5 * * * *')$$,
-  'three jobs, every 5 minutes'
+           ('bdpay-shopify-sync', '*/5 * * * *'), ('bdpay-store-webhooks-sync', '*/5 * * * *')$$,
+  'four jobs, every 5 minutes (spec 17 adds store-webhooks-sync)'
 );
 
 select is(

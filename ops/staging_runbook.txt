@@ -115,6 +115,8 @@ signature, secret or token (plan 14 section 2):
     supabase functions deploy claims-expire --no-verify-jwt
     supabase functions deploy shopify-sync --no-verify-jwt
     supabase functions deploy alerts-check --no-verify-jwt
+    supabase functions deploy merchant-api --no-verify-jwt
+    supabase functions deploy store-webhooks-sync --no-verify-jwt
 
 Called by the signed-in app with a Supabase user token (JWT check stays on):
 
@@ -123,6 +125,7 @@ Called by the signed-in app with a Supabase user token (JWT check stays on):
     supabase functions deploy shopify-connect-link
     supabase functions deploy shopify-status
     supabase functions deploy alerts-list
+    supabase functions deploy store-connections
 
 check: Dashboard > Edge Functions lists 17 functions; the 12 in the first list show "Verify JWT" off.
 check: a call without the secret is refused by BDPay itself (not by the gateway):

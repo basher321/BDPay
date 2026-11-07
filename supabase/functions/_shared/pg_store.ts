@@ -8,9 +8,12 @@ import {
 } from "npm:@supabase/supabase-js@2.118.0";
 import {
   type ClaimConflict,
+  type ConnectionUpdate,
   type DeviceUpdate,
+  type NewApiConnection,
   type NewDevice,
   type NewPaymentSession,
+  type OrderSyncUpdate,
   type ParserRulesRow,
   type SmsResult,
   type Store,
@@ -18,15 +21,19 @@ import {
 } from "./store.ts";
 import type {
   AuditEntry,
+  ConnectionRecord,
   Device,
   Match,
   MatchMethod,
   Operator,
+  OrderSync,
   PaymentClaim,
   PaymentSession,
   SmsRecord,
   Wallet,
 } from "./types.ts";
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // deno-lint-ignore no-explicit-any
 type Row = Record<string, any>;
@@ -94,6 +101,37 @@ export const toSession = (r: Row): PaymentSession => ({
   activeClaimId: r.active_claim_id,
   createdAt: iso(r.created_at),
   verifiedAt: isoOrNull(r.verified_at),
+});
+
+/** Spec 17: a stores row; Shopify rows (spec 10) have a shop_domain and no API key. */
+export const toConnection = (r: Row): ConnectionRecord => ({
+  id: r.id,
+  merchantId: r.merchant_id,
+  platform: r.platform,
+  kind: r.platform === "shopify" ? "oauth" : "api",
+  siteName: r.site_name ?? r.shop_domain ?? "",
+  siteUrl: r.site_url ?? (r.shop_domain ? `https://${r.shop_domain}` : null),
+  webhookUrl: r.webhook_url ?? null,
+  apiKeyPrefix: r.api_key_prefix ?? null,
+  status: r.status,
+  lastError: r.last_error ?? null,
+  connectedAt: iso(r.connected_at),
+  apiKeyHash: r.api_key_hash ?? null,
+  secretVersion: r.secret_version ?? 1,
+});
+
+const CONNECTION_COLUMNS =
+  "id, merchant_id, platform, shop_domain, status, last_error, connected_at, site_name, site_url, " +
+  "webhook_url, api_key_prefix, api_key_hash, secret_version";
+
+export const toOrderSync = (r: Row): OrderSync => ({
+  id: r.id,
+  merchantId: r.merchant_id,
+  sessionId: r.session_id,
+  status: r.status,
+  attempts: r.attempts,
+  nextAttemptAt: iso(r.next_attempt_at),
+  lastError: r.last_error ?? null,
 });
 
 export const toClaim = (r: Row): PaymentClaim => ({
@@ -513,5 +551,109 @@ export class PgStore implements Store {
       p_limit: limit,
       p_window_seconds: windowSeconds,
     })) === true;
+  }
+
+  // ---- spec 17 ----
+
+  async listConnections(merchantId: string) {
+    const r = this.ok(
+      await this.db.from("stores").select(CONNECTION_COLUMNS)
+        .eq("merchant_id", merchantId).order("connected_at", {
+          ascending: true,
+        }),
+    ) as Row[] | null;
+    return (r ?? []).map(toConnection);
+  }
+
+  async getConnection(id: string) {
+    if (!UUID.test(id)) return null;
+    const r = this.ok(
+      await this.db.from("stores").select(CONNECTION_COLUMNS).eq("id", id)
+        .maybeSingle(),
+    ) as Row | null;
+    return r === null ? null : toConnection(r);
+  }
+
+  async findConnectionByKeyHash(apiKeyHash: string) {
+    const r = this.ok(
+      await this.db.from("stores").select(CONNECTION_COLUMNS)
+        .eq("api_key_hash", apiKeyHash).maybeSingle(),
+    ) as Row | null;
+    return r === null ? null : toConnection(r);
+  }
+
+  async createApiConnection(f: NewApiConnection) {
+    const res = await this.db.from("stores").insert({
+      merchant_id: f.merchantId,
+      platform: f.platform,
+      site_name: f.siteName,
+      site_url: f.siteUrl,
+      api_key_prefix: f.apiKeyPrefix,
+      api_key_hash: f.apiKeyHash,
+    }).select(CONNECTION_COLUMNS).single();
+    if ((res.error as { code?: string } | null)?.code === "23505") {
+      return "duplicate" as const;
+    }
+    return toConnection(this.must(this.ok(res)));
+  }
+
+  async updateConnection(id: string, f: ConnectionUpdate) {
+    const patch: Row = {};
+    if (f.webhookUrl !== undefined) patch.webhook_url = f.webhookUrl;
+    if (f.apiKeyPrefix !== undefined) patch.api_key_prefix = f.apiKeyPrefix;
+    if (f.apiKeyHash !== undefined) patch.api_key_hash = f.apiKeyHash;
+    if (f.status !== undefined) patch.status = f.status;
+    if (!UUID.test(id)) throw new StoreError("notFound");
+    const r = this.ok(
+      await this.db.from("stores").update(patch).eq("id", id)
+        .select(CONNECTION_COLUMNS).maybeSingle(),
+    ) as Row | null;
+    if (r === null) throw new StoreError("notFound");
+    return toConnection(r);
+  }
+
+  async findSessionByExternalOrder(storeId: string, externalOrderId: string) {
+    if (!UUID.test(storeId)) return null;
+    const r = this.ok(
+      await this.db.from("payment_sessions").select("*")
+        .eq("store_id", storeId).eq("external_order_id", externalOrderId)
+        .maybeSingle(),
+    ) as Row | null;
+    return r === null ? null : toSession(r);
+  }
+
+  async enqueueOrderSync(merchantId: string, sessionId: string) {
+    this.ok(
+      await this.db.from("order_syncs").upsert({
+        merchant_id: merchantId,
+        session_id: sessionId,
+      }, { onConflict: "session_id", ignoreDuplicates: true }),
+    );
+    const r = this.ok(
+      await this.db.from("order_syncs").select("*").eq("session_id", sessionId)
+        .single(),
+    );
+    return toOrderSync(this.must(r));
+  }
+
+  async listDueOrderSyncs(nowIso: string, limit: number) {
+    const r = this.ok(
+      await this.db.from("order_syncs").select("*").eq("status", "pending")
+        .lte("next_attempt_at", nowIso).order("next_attempt_at", {
+          ascending: true,
+        }).limit(limit),
+    ) as Row[] | null;
+    return (r ?? []).map(toOrderSync);
+  }
+
+  async updateOrderSync(id: string, f: OrderSyncUpdate) {
+    this.ok(
+      await this.db.from("order_syncs").update({
+        status: f.status,
+        attempts: f.attempts,
+        next_attempt_at: f.nextAttemptAt,
+        last_error: f.lastError,
+      }).eq("id", id),
+    );
   }
 }

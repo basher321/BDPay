@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/colors.dart';
 import '../../core/validators.dart';
 import '../../data/account_providers.dart';
 import '../../domain/account_enums.dart';
@@ -23,6 +24,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _signup = false;
   bool _busy = false;
   bool _showForgot = false;
+  bool _showPassword = false;
   AuthResult? _error;
 
   @override
@@ -89,10 +91,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       TextField(
         key: const Key('passwordField'),
         controller: _password,
-        obscureText: true,
+        obscureText: !_showPassword,
         autocorrect: false,
         enableSuggestions: false,
         style: AppText.body13,
+        decoration: InputDecoration(
+          suffixIcon: IconButton(
+            key: const Key('passwordToggle'),
+            tooltip: _showPassword ? l.hidePassword : l.showPassword,
+            icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility, size: 20, color: AppColors.t3),
+            onPressed: () => setState(() => _showPassword = !_showPassword),
+          ),
+        ),
         onChanged: (_) => setState(() => _error = null),
         onSubmitted: (_) => _submit(),
       ),

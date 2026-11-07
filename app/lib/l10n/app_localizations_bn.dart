@@ -467,6 +467,12 @@ class AppLocalizationsBn extends AppLocalizations {
   String get passwordLabel => 'পাসওয়ার্ড';
 
   @override
+  String get showPassword => 'পাসওয়ার্ড দেখুন';
+
+  @override
+  String get hidePassword => 'পাসওয়ার্ড লুকান';
+
+  @override
   String get loginButton => 'লগইন';
 
   @override
@@ -862,4 +868,153 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get termsLink => 'শর্তাবলি';
+
+  @override
+  String get connectionsTitle => 'স্টোর / ওয়েবসাইট';
+
+  @override
+  String get connectionsEmpty => 'এখনো কোনো ওয়েবসাইট যুক্ত হয়নি';
+
+  @override
+  String get addStoreButton => '+ স্টোর যোগ করুন';
+
+  @override
+  String get choosePlatformTitle => 'প্ল্যাটফর্ম বেছে নিন';
+
+  @override
+  String get platformSearchHint => 'প্ল্যাটফর্ম খুঁজুন';
+
+  @override
+  String get platformOther => 'অন্য প্ল্যাটফর্ম';
+
+  @override
+  String get platformNoMatch =>
+      'কিছু পাওয়া যায়নি — \"অন্য প্ল্যাটফর্ম\" বেছে নিন';
+
+  @override
+  String get shopifyUseSection =>
+      'Shopify স্টোর নিচের \"Shopify স্টোর\" অংশ থেকে যুক্ত করুন';
+
+  @override
+  String get siteNameLabel => 'ওয়েবসাইটের নাম';
+
+  @override
+  String get siteUrlLabel => 'ওয়েবসাইটের ঠিকানা';
+
+  @override
+  String get siteUrlHint => 'https://yourshop.com';
+
+  @override
+  String get connectSiteButton => 'যুক্ত করুন';
+
+  @override
+  String get errSiteName => 'নাম ২ থেকে ৬০ অক্ষরের দিন';
+
+  @override
+  String get errSiteUrl => 'https:// দিয়ে শুরু হওয়া সঠিক ঠিকানা দিন';
+
+  @override
+  String get errSiteDuplicate => 'এই ওয়েবসাইট এই প্ল্যাটফর্মে আগেই যুক্ত আছে';
+
+  @override
+  String get siteConnectedTitle => 'যুক্ত হয়েছে';
+
+  @override
+  String get apiKeyLabel => 'API কী';
+
+  @override
+  String get webhookSecretLabel => 'ওয়েবহুক সিক্রেট';
+
+  @override
+  String get keyShownOnce =>
+      'এই কী আর দেখানো হবে না — এখনই কপি করে নিরাপদে রাখুন';
+
+  @override
+  String get copyButton => 'কপি করুন';
+
+  @override
+  String get copiedToast => 'কপি হয়েছে';
+
+  @override
+  String get doneButton => 'হয়ে গেছে';
+
+  @override
+  String get connStatusActive => 'চালু';
+
+  @override
+  String get connStatusDisabled => 'বন্ধ';
+
+  @override
+  String get connStatusUninstalled => 'আনইনস্টল';
+
+  @override
+  String get keyPrefixLabel => 'কী-এর শুরু';
+
+  @override
+  String connConnectedAgo(String time) {
+    return 'যুক্ত হয়েছে $time';
+  }
+
+  @override
+  String get webhookUrlLabel => 'ওয়েবহুক ঠিকানা (ঐচ্ছিক)';
+
+  @override
+  String get webhookUrlHint => 'https://yourshop.com/bdpay-webhook';
+
+  @override
+  String get saveWebhookButton => 'ওয়েবহুক সংরক্ষণ করুন';
+
+  @override
+  String get webhookSaved => 'ওয়েবহুক সংরক্ষিত হয়েছে';
+
+  @override
+  String get rotateKeyButton => 'নতুন কী তৈরি করুন';
+
+  @override
+  String get rotateKeyConfirm =>
+      'নতুন কী তৈরি করলে পুরোনো কী সাথে সাথে বন্ধ হয়ে যাবে। চালিয়ে যাবেন?';
+
+  @override
+  String get newKeyTitle => 'নতুন API কী';
+
+  @override
+  String get disableConnButton => 'সংযোগ বন্ধ করুন';
+
+  @override
+  String get disableConnConfirm =>
+      'সংযোগ বন্ধ করলে এই ওয়েবসাইট থেকে নতুন অর্ডার আর আসবে না। আগের লেনদেন থাকবে। চালিয়ে যাবেন?';
+
+  @override
+  String get apiAddressLabel => 'API ঠিকানা';
+
+  @override
+  String get guideApiStep1 =>
+      'API কী আপনার ওয়েবসাইটের সার্ভারে গোপন সেটিং হিসেবে রাখুন। কখনো ব্রাউজারের কোডে বা পাবলিক পেজে রাখবেন না।';
+
+  @override
+  String get guideApiStep2 =>
+      'অর্ডার হলে সার্ভার থেকে API ঠিকানায় POST পাঠান: orderId, orderRef, amountPoisha (১ টাকা = ১০০ পয়সা, যেমন ৳ 1,250.00 = 125000), currency \"BDT\", returnUrl। হেডার: Authorization: Bearer <API কী>।';
+
+  @override
+  String get guideApiStep3 =>
+      'উত্তরের payUrl-এ গ্রাহককে পাঠান। সেখানে গ্রাহক bKash / Nagad / Rocket / Upay-এর TrxID দেবে।';
+
+  @override
+  String get guideApiStep4 =>
+      'পেমেন্ট যাচাই হলে BDPay আপনার ওয়েবহুক ঠিকানায় payment.verified পাঠাবে। X-BDPay-Signature ওয়েবহুক সিক্রেট দিয়ে মিলিয়ে নিন। ওয়েবহুক না থাকলে GET API ঠিকানা/<orderId> দিয়ে অবস্থা দেখুন।';
+
+  @override
+  String guideServerPlatform(String platform) {
+    return '$platform: কলটি আপনার সার্ভারের কোড থেকে করুন (যেমন প্লাগিন, মডিউল, কন্ট্রোলার বা API রুট)।';
+  }
+
+  @override
+  String guideBuilderPlatform(String platform) {
+    return '$platform: কলটি সাইটের ব্যাকএন্ড বা অটোমেশন ফিচার থেকে করুন (যেমন Wix Velo, Bubble API Connector, HubSpot serverless function, অথবা Zapier / Make)।';
+  }
+
+  @override
+  String guideBrowserPlatform(String platform) {
+    return '$platform ব্রাউজারে চলে — API কী সেখানে রাখবেন না। একটি ছোট সার্ভার (যেমন Node.js বা serverless function) থেকে কল করুন।';
+  }
 }

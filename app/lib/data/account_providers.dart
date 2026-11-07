@@ -7,9 +7,11 @@ import '../domain/models/app_alert.dart';
 import '../domain/models/auth_state.dart';
 import '../domain/models/pipeline_state.dart';
 import '../domain/models/shopify_store.dart';
+import '../domain/models/store_connection.dart';
 import '../domain/models/wallet.dart';
 import '../domain/repositories/alerts_repository.dart';
 import '../domain/repositories/auth_repository.dart';
+import '../domain/repositories/connections_repository.dart';
 import '../domain/repositories/pipeline_repository.dart';
 import '../domain/repositories/store_repository.dart';
 import '../domain/repositories/wallet_repository.dart';
@@ -18,6 +20,7 @@ import 'device/device_providers.dart';
 import 'device/device_registration.dart';
 import 'mock/mock_account_data.dart';
 import 'mock/mock_alerts_repository.dart';
+import 'mock/mock_connections_repository.dart';
 import 'mock/mock_pipeline_repository.dart';
 import 'mock/mock_auth_repository.dart';
 import 'mock/mock_shopify_repository.dart';
@@ -75,6 +78,19 @@ final storeRepositoryProvider = Provider<StoreRepository>((ref) {
   ref.onDispose(repo.dispose);
   return repo;
 });
+
+/// Spec 17: the merchant's website connections (store-connections).
+final connectionsRepositoryProvider = Provider<ConnectionsRepository>((ref) {
+  if (!_real(ref)) return MockConnectionsRepository(ref.watch(mockAccountDataProvider));
+  final repo = buildConnectionsRepository(ref.watch(authRepositoryProvider).watch(), ref.watch(appForegroundProvider))
+    ..start();
+  ref.onDispose(repo.dispose);
+  return repo;
+});
+
+final connectionsProvider = StreamProvider<List<StoreConnection>>(
+  (ref) => ref.watch(connectionsRepositoryProvider).watch(),
+);
 
 /// Spec 13: open alerts (alerts-list). The mock has none unless a test sets them.
 final alertsRepositoryProvider = Provider<AlertsRepository>((ref) {

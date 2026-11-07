@@ -9,9 +9,12 @@ import { storeLimiter } from "./rate_limit.ts";
 import { loadRules, rulesVersion } from "./parser.ts";
 import rulesJson from "./parser_rules.json" with { type: "json" };
 import {
+  type ConnectionUpdate,
   type DeviceUpdate,
+  type NewApiConnection,
   type NewDevice,
   type NewPaymentSession,
+  type OrderSyncUpdate,
   type ParserRulesRow,
   type SmsResult,
   type Store,
@@ -19,10 +22,12 @@ import {
 } from "./store.ts";
 import type {
   AuditEntry,
+  ConnectionRecord,
   Device,
   Match,
   MatchMethod,
   Operator,
+  OrderSync,
   PaymentClaim,
   PaymentSession,
   SmsRecord,
@@ -161,6 +166,16 @@ export class FakeStore implements Store {
   }
 
   createPaymentSession(fields: NewPaymentSession) {
+    if (fields.externalOrderId !== null) {
+      for (const s of this.sessions.values()) {
+        if (
+          s.storeId === fields.storeId &&
+          s.externalOrderId === fields.externalOrderId
+        ) {
+          return Promise.reject(new StoreError("conflict"));
+        }
+      }
+    }
     const session: PaymentSession = {
       ...fields,
       id: crypto.randomUUID(),
@@ -446,6 +461,134 @@ export class FakeStore implements Store {
     this.rateCounts.set(k, n);
     return Promise.resolve(n <= limit);
   }
+
+  // ---- Spec 17 ----
+
+  readonly connections = new Map<string, ConnectionRecord>();
+  readonly orderSyncs = new Map<string, OrderSync>();
+
+  /** Test-only: a Shopify (OAuth) connection like the spec 10 callback makes. */
+  addShopifyConnection(merchantId: string, shopDomain: string): string {
+    const id = crypto.randomUUID();
+    this.connections.set(id, {
+      id,
+      merchantId,
+      platform: "shopify",
+      kind: "oauth",
+      siteName: shopDomain,
+      siteUrl: `https://${shopDomain}`,
+      webhookUrl: null,
+      apiKeyPrefix: null,
+      status: "active",
+      lastError: null,
+      connectedAt: this.iso(),
+      apiKeyHash: null,
+      secretVersion: 1,
+    });
+    return id;
+  }
+
+  listConnections(merchantId: string) {
+    return Promise.resolve(
+      [...this.connections.values()]
+        .filter((c) => c.merchantId === merchantId)
+        .sort((a, b) => a.connectedAt.localeCompare(b.connectedAt))
+        .map((c) => ({ ...c })),
+    );
+  }
+
+  getConnection(id: string) {
+    const c = this.connections.get(id);
+    return Promise.resolve(c === undefined ? null : { ...c });
+  }
+
+  findConnectionByKeyHash(apiKeyHash: string) {
+    for (const c of this.connections.values()) {
+      if (c.apiKeyHash === apiKeyHash) return Promise.resolve({ ...c });
+    }
+    return Promise.resolve(null);
+  }
+
+  createApiConnection(f: NewApiConnection) {
+    for (const c of this.connections.values()) {
+      if (
+        c.merchantId === f.merchantId && c.platform === f.platform &&
+        c.siteUrl === f.siteUrl && c.status === "active"
+      ) {
+        return Promise.resolve("duplicate" as const);
+      }
+    }
+    const c: ConnectionRecord = {
+      id: crypto.randomUUID(),
+      merchantId: f.merchantId,
+      platform: f.platform,
+      kind: "api",
+      siteName: f.siteName,
+      siteUrl: f.siteUrl,
+      webhookUrl: null,
+      apiKeyPrefix: f.apiKeyPrefix,
+      status: "active",
+      lastError: null,
+      connectedAt: this.iso(),
+      apiKeyHash: f.apiKeyHash,
+      secretVersion: 1,
+    };
+    this.connections.set(c.id, c);
+    return Promise.resolve({ ...c });
+  }
+
+  updateConnection(id: string, fields: ConnectionUpdate) {
+    const c = this.connections.get(id);
+    if (c === undefined) return Promise.reject(new StoreError("notFound"));
+    Object.assign(c, fields);
+    return Promise.resolve({ ...c });
+  }
+
+  findSessionByExternalOrder(storeId: string, externalOrderId: string) {
+    for (const s of this.sessions.values()) {
+      if (s.storeId === storeId && s.externalOrderId === externalOrderId) {
+        return Promise.resolve({ ...s });
+      }
+    }
+    return Promise.resolve(null);
+  }
+
+  enqueueOrderSync(merchantId: string, sessionId: string) {
+    for (const o of this.orderSyncs.values()) {
+      if (o.sessionId === sessionId) return Promise.resolve({ ...o });
+    }
+    const o: OrderSync = {
+      id: crypto.randomUUID(),
+      merchantId,
+      sessionId,
+      status: "pending",
+      attempts: 0,
+      nextAttemptAt: this.iso(),
+      lastError: null,
+    };
+    this.orderSyncs.set(o.id, o);
+    return Promise.resolve({ ...o });
+  }
+
+  listDueOrderSyncs(nowIso: string, limit: number) {
+    const now = Date.parse(nowIso);
+    return Promise.resolve(
+      [...this.orderSyncs.values()]
+        .filter((o) =>
+          o.status === "pending" && Date.parse(o.nextAttemptAt) <= now
+        )
+        .sort((a, b) => a.nextAttemptAt.localeCompare(b.nextAttemptAt))
+        .slice(0, limit)
+        .map((o) => ({ ...o })),
+    );
+  }
+
+  updateOrderSync(id: string, fields: OrderSyncUpdate) {
+    const o = this.orderSyncs.get(id);
+    if (o === undefined) return Promise.reject(new StoreError("notFound"));
+    Object.assign(o, fields);
+    return Promise.resolve();
+  }
 }
 
 /** Fixed demo data for BDPAY_FAKE_STORE=1 runs and the smoke script. Not secrets: they only work with FakeStore. */
@@ -498,6 +641,8 @@ export function depsFromEnv(
       payPageOrigin: get("PAY_PAGE_ORIGIN"),
       cronSecret: get("CRON_SECRET"),
       rateLimitPepper: get("RATE_LIMIT_PEPPER"),
+      payTokenSecret: get("PAY_TOKEN_SECRET"),
+      payPageUrl: get("PAY_PAGE_URL"),
     },
   };
   return local;

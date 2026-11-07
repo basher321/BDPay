@@ -85,3 +85,20 @@ bool _lengthBetween(String s, int min, int max) {
   final n = s.runes.length;
   return n >= min && n <= max;
 }
+
+/// Spec 17: a website name, 2 to 60 characters after trimming.
+bool isValidSiteName(String s) => _lengthBetween(s.trim(), 2, 60);
+
+/// Spec 17: an https address with a real host name (no user info, no IP address, not localhost), at most 300
+/// characters. Returns the trimmed address without a trailing "/" on a bare host, or null.
+String? normalizeHttpsUrl(String s) {
+  final t = s.trim();
+  if (t.isEmpty || t.length > 300) return null;
+  final u = Uri.tryParse(t);
+  if (u == null || u.scheme != 'https' || u.userInfo.isNotEmpty) return null;
+  final host = u.host.toLowerCase();
+  if (!host.contains('.') || host == 'localhost' || host.endsWith('.localhost')) return null;
+  if (RegExp(r'^[0-9.]+$').hasMatch(host) || t.contains('://[')) return null;
+  final noFragment = u.removeFragment().toString();
+  return (u.path.isEmpty || u.path == '/') && !u.hasQuery ? noFragment.replaceFirst(RegExp(r'/$'), '') : noFragment;
+}

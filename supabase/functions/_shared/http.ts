@@ -26,6 +26,15 @@ export type ErrorCode =
   | "rateLimited"
   | "notFound"
   | "badCronSecret"
+  | "invalidName"
+  | "invalidUrl"
+  | "invalidPlatform"
+  | "duplicate"
+  | "useShopifyConnect"
+  | "badApiKey"
+  | "orderChanged"
+  | "wrongCurrency"
+  | "badAmount"
   | "internalError";
 
 const MESSAGES: Record<ErrorCode, string> = {
@@ -45,6 +54,15 @@ const MESSAGES: Record<ErrorCode, string> = {
   rateLimited: "Too many requests. Try again later.",
   notFound: "Not found.",
   badCronSecret: "The cron secret is missing or wrong.",
+  invalidName: "The site name must be 2 to 60 characters.",
+  invalidUrl: "The address must be a valid https URL.",
+  invalidPlatform: "The platform is not one of the supported values.",
+  duplicate: "This site is already connected for this platform.",
+  useShopifyConnect: "Shopify stores connect through the Shopify flow.",
+  badApiKey: "The API key is missing, wrong or no longer active.",
+  orderChanged: "This order was already sent with a different amount.",
+  wrongCurrency: "Only BDT is supported.",
+  badAmount: "amountPoisha must be a whole number greater than 0.",
   internalError: "Something went wrong on the server.",
 };
 
@@ -71,6 +89,10 @@ export interface AppConfig {
   payPageOrigin?: string;
   cronSecret?: string;
   rateLimitPepper?: string;
+  /** Spec 17: derives pay tokens of API orders and webhook secrets (never stored). */
+  payTokenSecret?: string;
+  /** Spec 17: the pay page address; the pay link is PAY_PAGE_URL + "?t=" + token. */
+  payPageUrl?: string;
 }
 
 /** What every core handler gets. now() is milliseconds since epoch. */

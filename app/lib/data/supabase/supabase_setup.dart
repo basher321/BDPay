@@ -7,6 +7,7 @@ import 'auth_gateway.dart';
 import 'functions_gateway.dart';
 import 'secure_session_storage.dart';
 import 'supabase_alerts_repository.dart';
+import 'supabase_connections_repository.dart';
 import 'supabase_auth_repository.dart';
 import 'supabase_store_repository.dart';
 import 'supabase_wallet_repository.dart';
@@ -39,6 +40,10 @@ SupabaseStoreRepository buildStoreRepository(Stream<AuthState> auth, AppForegrou
       auth: auth,
       foreground: foreground,
     );
+
+/// Spec 17.
+SupabaseConnectionsRepository buildConnectionsRepository(Stream<AuthState> auth, AppForeground foreground) =>
+    SupabaseConnectionsRepository(functions: SupabaseFunctionsGateway(_client.functions), auth: auth, foreground: foreground);
 
 SupabaseAlertsRepository buildAlertsRepository(Stream<AuthState> auth, AppForeground foreground) =>
     SupabaseAlertsRepository(functions: SupabaseFunctionsGateway(_client.functions), auth: auth, foreground: foreground);

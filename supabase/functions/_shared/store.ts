@@ -3,12 +3,16 @@
 
 import type {
   AuditEntry,
+  ConnectionRecord,
   Device,
   Match,
   MatchMethod,
   Operator,
+  OrderSync,
+  OrderSyncStatus,
   PaymentClaim,
   PaymentSession,
+  Platform,
   SmsRecord,
   Wallet,
 } from "./types.ts";
@@ -135,6 +139,52 @@ export interface Store {
     limit: number,
     windowSeconds: number,
   ): Promise<boolean>;
+
+  // ---- Spec 17: store connections ----
+  /** All connections of the merchant (Shopify and API), oldest first. */
+  listConnections(merchantId: string): Promise<ConnectionRecord[]>;
+  getConnection(id: string): Promise<ConnectionRecord | null>;
+  findConnectionByKeyHash(apiKeyHash: string): Promise<ConnectionRecord | null>;
+  /** "duplicate" when the merchant already has an active connection for this platform + siteUrl. */
+  createApiConnection(
+    fields: NewApiConnection,
+  ): Promise<ConnectionRecord | "duplicate">;
+  /** Unknown id -> StoreError notFound. */
+  updateConnection(
+    id: string,
+    fields: ConnectionUpdate,
+  ): Promise<ConnectionRecord>;
+  findSessionByExternalOrder(
+    storeId: string,
+    externalOrderId: string,
+  ): Promise<PaymentSession | null>;
+  /** One per session: a second call returns the first. */
+  enqueueOrderSync(merchantId: string, sessionId: string): Promise<OrderSync>;
+  listDueOrderSyncs(nowIso: string, limit: number): Promise<OrderSync[]>;
+  updateOrderSync(id: string, fields: OrderSyncUpdate): Promise<void>;
+}
+
+export interface NewApiConnection {
+  merchantId: string;
+  platform: Exclude<Platform, "shopify">;
+  siteName: string;
+  siteUrl: string;
+  apiKeyPrefix: string;
+  apiKeyHash: string;
+}
+
+export type ConnectionUpdate = Partial<{
+  webhookUrl: string | null;
+  apiKeyPrefix: string;
+  apiKeyHash: string;
+  status: "active" | "disabled";
+}>;
+
+export interface OrderSyncUpdate {
+  status: OrderSyncStatus;
+  attempts: number;
+  nextAttemptAt: string;
+  lastError: string | null;
 }
 
 export interface NewPaymentSession {

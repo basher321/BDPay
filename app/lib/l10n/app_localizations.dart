@@ -922,6 +922,18 @@ abstract class AppLocalizations {
   /// **'পাসওয়ার্ড'**
   String get passwordLabel;
 
+  /// No description provided for @showPassword.
+  ///
+  /// In bn, this message translates to:
+  /// **'পাসওয়ার্ড দেখুন'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In bn, this message translates to:
+  /// **'পাসওয়ার্ড লুকান'**
+  String get hidePassword;
+
   /// No description provided for @loginButton.
   ///
   /// In bn, this message translates to:
@@ -1659,6 +1671,270 @@ abstract class AppLocalizations {
   /// In bn, this message translates to:
   /// **'শর্তাবলি'**
   String get termsLink;
+
+  /// No description provided for @connectionsTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'স্টোর / ওয়েবসাইট'**
+  String get connectionsTitle;
+
+  /// No description provided for @connectionsEmpty.
+  ///
+  /// In bn, this message translates to:
+  /// **'এখনো কোনো ওয়েবসাইট যুক্ত হয়নি'**
+  String get connectionsEmpty;
+
+  /// No description provided for @addStoreButton.
+  ///
+  /// In bn, this message translates to:
+  /// **'+ স্টোর যোগ করুন'**
+  String get addStoreButton;
+
+  /// No description provided for @choosePlatformTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'প্ল্যাটফর্ম বেছে নিন'**
+  String get choosePlatformTitle;
+
+  /// No description provided for @platformSearchHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'প্ল্যাটফর্ম খুঁজুন'**
+  String get platformSearchHint;
+
+  /// No description provided for @platformOther.
+  ///
+  /// In bn, this message translates to:
+  /// **'অন্য প্ল্যাটফর্ম'**
+  String get platformOther;
+
+  /// No description provided for @platformNoMatch.
+  ///
+  /// In bn, this message translates to:
+  /// **'কিছু পাওয়া যায়নি — \"অন্য প্ল্যাটফর্ম\" বেছে নিন'**
+  String get platformNoMatch;
+
+  /// No description provided for @shopifyUseSection.
+  ///
+  /// In bn, this message translates to:
+  /// **'Shopify স্টোর নিচের \"Shopify স্টোর\" অংশ থেকে যুক্ত করুন'**
+  String get shopifyUseSection;
+
+  /// No description provided for @siteNameLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'ওয়েবসাইটের নাম'**
+  String get siteNameLabel;
+
+  /// No description provided for @siteUrlLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'ওয়েবসাইটের ঠিকানা'**
+  String get siteUrlLabel;
+
+  /// No description provided for @siteUrlHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'https://yourshop.com'**
+  String get siteUrlHint;
+
+  /// No description provided for @connectSiteButton.
+  ///
+  /// In bn, this message translates to:
+  /// **'যুক্ত করুন'**
+  String get connectSiteButton;
+
+  /// No description provided for @errSiteName.
+  ///
+  /// In bn, this message translates to:
+  /// **'নাম ২ থেকে ৬০ অক্ষরের দিন'**
+  String get errSiteName;
+
+  /// No description provided for @errSiteUrl.
+  ///
+  /// In bn, this message translates to:
+  /// **'https:// দিয়ে শুরু হওয়া সঠিক ঠিকানা দিন'**
+  String get errSiteUrl;
+
+  /// No description provided for @errSiteDuplicate.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই ওয়েবসাইট এই প্ল্যাটফর্মে আগেই যুক্ত আছে'**
+  String get errSiteDuplicate;
+
+  /// No description provided for @siteConnectedTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'যুক্ত হয়েছে'**
+  String get siteConnectedTitle;
+
+  /// No description provided for @apiKeyLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'API কী'**
+  String get apiKeyLabel;
+
+  /// No description provided for @webhookSecretLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'ওয়েবহুক সিক্রেট'**
+  String get webhookSecretLabel;
+
+  /// No description provided for @keyShownOnce.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই কী আর দেখানো হবে না — এখনই কপি করে নিরাপদে রাখুন'**
+  String get keyShownOnce;
+
+  /// No description provided for @copyButton.
+  ///
+  /// In bn, this message translates to:
+  /// **'কপি করুন'**
+  String get copyButton;
+
+  /// No description provided for @copiedToast.
+  ///
+  /// In bn, this message translates to:
+  /// **'কপি হয়েছে'**
+  String get copiedToast;
+
+  /// No description provided for @doneButton.
+  ///
+  /// In bn, this message translates to:
+  /// **'হয়ে গেছে'**
+  String get doneButton;
+
+  /// No description provided for @connStatusActive.
+  ///
+  /// In bn, this message translates to:
+  /// **'চালু'**
+  String get connStatusActive;
+
+  /// No description provided for @connStatusDisabled.
+  ///
+  /// In bn, this message translates to:
+  /// **'বন্ধ'**
+  String get connStatusDisabled;
+
+  /// No description provided for @connStatusUninstalled.
+  ///
+  /// In bn, this message translates to:
+  /// **'আনইনস্টল'**
+  String get connStatusUninstalled;
+
+  /// No description provided for @keyPrefixLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'কী-এর শুরু'**
+  String get keyPrefixLabel;
+
+  /// No description provided for @connConnectedAgo.
+  ///
+  /// In bn, this message translates to:
+  /// **'যুক্ত হয়েছে {time}'**
+  String connConnectedAgo(String time);
+
+  /// No description provided for @webhookUrlLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'ওয়েবহুক ঠিকানা (ঐচ্ছিক)'**
+  String get webhookUrlLabel;
+
+  /// No description provided for @webhookUrlHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'https://yourshop.com/bdpay-webhook'**
+  String get webhookUrlHint;
+
+  /// No description provided for @saveWebhookButton.
+  ///
+  /// In bn, this message translates to:
+  /// **'ওয়েবহুক সংরক্ষণ করুন'**
+  String get saveWebhookButton;
+
+  /// No description provided for @webhookSaved.
+  ///
+  /// In bn, this message translates to:
+  /// **'ওয়েবহুক সংরক্ষিত হয়েছে'**
+  String get webhookSaved;
+
+  /// No description provided for @rotateKeyButton.
+  ///
+  /// In bn, this message translates to:
+  /// **'নতুন কী তৈরি করুন'**
+  String get rotateKeyButton;
+
+  /// No description provided for @rotateKeyConfirm.
+  ///
+  /// In bn, this message translates to:
+  /// **'নতুন কী তৈরি করলে পুরোনো কী সাথে সাথে বন্ধ হয়ে যাবে। চালিয়ে যাবেন?'**
+  String get rotateKeyConfirm;
+
+  /// No description provided for @newKeyTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'নতুন API কী'**
+  String get newKeyTitle;
+
+  /// No description provided for @disableConnButton.
+  ///
+  /// In bn, this message translates to:
+  /// **'সংযোগ বন্ধ করুন'**
+  String get disableConnButton;
+
+  /// No description provided for @disableConnConfirm.
+  ///
+  /// In bn, this message translates to:
+  /// **'সংযোগ বন্ধ করলে এই ওয়েবসাইট থেকে নতুন অর্ডার আর আসবে না। আগের লেনদেন থাকবে। চালিয়ে যাবেন?'**
+  String get disableConnConfirm;
+
+  /// No description provided for @apiAddressLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'API ঠিকানা'**
+  String get apiAddressLabel;
+
+  /// No description provided for @guideApiStep1.
+  ///
+  /// In bn, this message translates to:
+  /// **'API কী আপনার ওয়েবসাইটের সার্ভারে গোপন সেটিং হিসেবে রাখুন। কখনো ব্রাউজারের কোডে বা পাবলিক পেজে রাখবেন না।'**
+  String get guideApiStep1;
+
+  /// No description provided for @guideApiStep2.
+  ///
+  /// In bn, this message translates to:
+  /// **'অর্ডার হলে সার্ভার থেকে API ঠিকানায় POST পাঠান: orderId, orderRef, amountPoisha (১ টাকা = ১০০ পয়সা, যেমন ৳ 1,250.00 = 125000), currency \"BDT\", returnUrl। হেডার: Authorization: Bearer <API কী>।'**
+  String get guideApiStep2;
+
+  /// No description provided for @guideApiStep3.
+  ///
+  /// In bn, this message translates to:
+  /// **'উত্তরের payUrl-এ গ্রাহককে পাঠান। সেখানে গ্রাহক bKash / Nagad / Rocket / Upay-এর TrxID দেবে।'**
+  String get guideApiStep3;
+
+  /// No description provided for @guideApiStep4.
+  ///
+  /// In bn, this message translates to:
+  /// **'পেমেন্ট যাচাই হলে BDPay আপনার ওয়েবহুক ঠিকানায় payment.verified পাঠাবে। X-BDPay-Signature ওয়েবহুক সিক্রেট দিয়ে মিলিয়ে নিন। ওয়েবহুক না থাকলে GET API ঠিকানা/<orderId> দিয়ে অবস্থা দেখুন।'**
+  String get guideApiStep4;
+
+  /// No description provided for @guideServerPlatform.
+  ///
+  /// In bn, this message translates to:
+  /// **'{platform}: কলটি আপনার সার্ভারের কোড থেকে করুন (যেমন প্লাগিন, মডিউল, কন্ট্রোলার বা API রুট)।'**
+  String guideServerPlatform(String platform);
+
+  /// No description provided for @guideBuilderPlatform.
+  ///
+  /// In bn, this message translates to:
+  /// **'{platform}: কলটি সাইটের ব্যাকএন্ড বা অটোমেশন ফিচার থেকে করুন (যেমন Wix Velo, Bubble API Connector, HubSpot serverless function, অথবা Zapier / Make)।'**
+  String guideBuilderPlatform(String platform);
+
+  /// No description provided for @guideBrowserPlatform.
+  ///
+  /// In bn, this message translates to:
+  /// **'{platform} ব্রাউজারে চলে — API কী সেখানে রাখবেন না। একটি ছোট সার্ভার (যেমন Node.js বা serverless function) থেকে কল করুন।'**
+  String guideBrowserPlatform(String platform);
 }
 
 class _AppLocalizationsDelegate
